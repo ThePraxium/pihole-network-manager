@@ -1,0 +1,20 @@
+# Pi-hole Network Manager - Local Execution Dependencies
+
+# TUI and Display
+rich>=13.0.0              # Rich terminal UI library
+
+# Configuration
+pyyaml>=6.0               # YAML configuration files
+
+# Router Integration (Optional - for TP-Link router control)
+tplinkrouterc6u>=2.0.0    # TP-Link router SSH control
+requests>=2.31.0          # HTTP requests
+
+# Data Processing
+pandas>=2.0.0             # Data analysis (for statistics)
+
+# Encryption
+cryptography>=41.0.0      # Router password encryption
+
+# Date/Time
+python-dateutil>=2.8.2    # Date parsing and manipulation

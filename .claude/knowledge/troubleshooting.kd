@@ -1,0 +1,59 @@
+# Pi-hole Network Manager - Troubleshooting (KDL)
+# Ultra-compact knowledge base for known issues and resolutions
+# Format: <category>::<type>::<slug>:<summary>|<key>:<value>|<key>:<value>...
+
+# Local Execution Issues
+issue::exec::permission-denied:command-permission-denied|cause:sudoers-not-configured|fix:rerun-initial-setup.sh-or-check-group-membership|severity:high|common:true
+issue::exec::sudo-password-prompt:sudo-prompting-for-password|cause:user-not-in-pihole-manager-group|fix:logout-login-after-setup|severity:medium
+issue::exec::command-not-found:pihole-command-not-found|cause:pihole-not-installed|fix:install-pihole-first|severity:critical
+issue::exec::database-locked:sqlite-database-locked|cause:pihole-ftl-accessing-db|fix:stop-pihole-FTL-or-retry|severity:medium
+
+# Setup Issues
+issue::setup::setup-not-complete:app-shows-setup-not-complete|cause:initial-setup.sh-not-run|fix:sudo-./pi-setup/initial-setup.sh|severity:critical
+issue::setup::python-version:python-version-too-old|cause:python-3.11-not-installed|fix:install-python3.11-or-higher|severity:high
+issue::setup::venv-creation-failed:virtual-environment-creation-fails|cause:python3-venv-not-installed|fix:sudo-apt-install-python3-venv|severity:high
+issue::setup::state-file-missing:state.json-not-found|cause:setup-incomplete-or-deleted|fix:rerun-initial-setup.sh|severity:high
+
+# Pi-hole Issues
+issue::pihole::gravity-timeout:gravity-rebuild-takes-too-long|cause:large-blocklist-or-slow-pi|fix:use-smaller-profile-or-wait|severity:low
+issue::pihole::dns-failure:dns-queries-not-resolving|cause:pihole-ftl-service-down|fix:sudo-systemctl-restart-pihole-FTL|severity:critical
+issue::pihole::blocking-too-aggressive:legitimate-sites-blocked|cause:aggressive-blocklist-profile|fix:switch-to-moderate-or-whitelist-domains|severity:medium
+issue::pihole::gravity-db-corrupt:gravity-database-corruption|cause:power-failure-or-disk-error|fix:pihole -r --reconfigure|severity:high
+issue::pihole::update-fails:pihole-update-command-fails|cause:network-issue-or-repo-unavailable|fix:check-internet-retry-later|severity:medium
+issue::pihole::web-interface-404:admin-panel-not-accessible|cause:lighttpd-service-down|fix:sudo-systemctl-restart-lighttpd|severity:medium
+issue::pihole::not-blocking:ads-not-being-blocked|cause:router-dns-not-pointing-to-pi|fix:configure-router-dhcp-dns-to-pi-ip|severity:high
+
+# Python Issues
+issue::python::import-error:module-import-fails|cause:missing-dependency|fix:activate-venv-pip-install-requirements.txt|severity:high
+issue::python::rich-ui-broken:tui-display-issues|cause:terminal-not-compatible|fix:use-different-terminal-or-update-rich|severity:low
+issue::python::venv-not-activated:dependencies-not-found|cause:venv-not-activated|fix:main.py-activates-automatically|severity:low
+
+# Configuration Issues
+issue::config::config-not-found:config.yaml-not-found|cause:initial-setup-not-run|fix:run-initial-setup.sh|severity:high
+issue::config::config-not-saved:configuration-not-persisting|cause:yaml-file-write-error|fix:check-/opt/pihole-manager-perms|severity:medium
+issue::config::router-password-decrypt-fail:cannot-decrypt-router-password|cause:corruption-or-machine-id-change|fix:re-enter-router-credentials|severity:medium
+
+# Router Issues
+issue::router::connection-timeout:tplink-api-timeout|cause:router-ip-wrong-or-offline|fix:verify-router-ip-password|severity:medium
+issue::router::auth-failed:router-authentication-fails|cause:wrong-password|fix:update-password-in-config|severity:medium
+issue::router::features-incomplete:router-features-not-working|cause:pending-hardware-testing|fix:use-web-interface-workaround|severity:low|known-limitation:true
+issue::router::ssh-from-pi-fails:ssh-from-pi-to-router-fails|cause:router-ssh-disabled-or-firewall|fix:enable-ssh-on-router-or-use-web|severity:medium
+
+# Content Filter Issues
+issue::content-filter::no-auto-enforcement:time-based-rules-not-automatic|cause:manual-enforcement-required|fix:create-cron-jobs-or-enable-disable-manually|severity:medium|known-limitation:true
+issue::content-filter::rules-not-applying:rules-created-but-not-blocking|cause:gravity-not-rebuilt|fix:run-pihole -g-after-rule-changes|severity:medium
+
+# Deployment Issues
+issue::deploy::git-clone-fails:git-clone-fails|cause:no-internet-or-wrong-url|fix:check-network-verify-repo-url|severity:high
+issue::deploy::permissions-wrong:permission-denied-after-clone|cause:files-owned-by-root|fix:sudo-chown -R-$USER:$USER-/opt/pihole-network-manager|severity:high
+issue::deploy::config-not-saved:configuration-not-persisting|cause:yaml-file-write-error|fix:check-/opt/pihole-manager-perms|severity:medium
+
+# Network Issues
+issue::network::pi-not-found:cannot-ssh-to-pi|cause:wrong-hostname-or-dhcp-change|fix:check-router-dhcp-leases-or-use-ip|severity:high
+issue::network::dns-loop:dns-resolution-loops|cause:pi-dns-pointing-to-itself|fix:configure-upstream-dns-in-pihole|severity:critical
+issue::network::static-ip-lost:pi-ip-changed-after-reboot|cause:dhcp-reservation-not-set|fix:set-static-ip-or-dhcp-reservation|severity:high
+
+# System Issues
+issue::system::disk-full:disk-space-full|cause:logs-or-query-db-too-large|fix:clear-logs-or-expand-storage|severity:critical
+issue::system::sd-card-corruption:filesystem-errors|cause:sd-card-failure|fix:replace-sd-card-restore-backup|severity:critical
+issue::system::high-temperature:pi-throttling-or-overheating|cause:inadequate-cooling|fix:add-heatsink-or-fan|severity:medium

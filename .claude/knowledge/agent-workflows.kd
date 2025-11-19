@@ -1,0 +1,61 @@
+# Pi-hole Network Manager - Agent Workflows (KDL)
+# Ultra-compact knowledge base for agent coordination and workflows
+# Format: <category>::<type>::<name>:<primary-id>|<key>:<value>|<key>:<value>...
+
+# Agent Roles
+agent::role::scrum-leader:pihole-scrum-leader|responsibilities:orchestration,sprints,releases,github-issues|blocking:no|coordinates:all-agents
+agent::role::knowledge-manager:project-knowledge-manager|responsibilities:kd-files,docs,validation,blocking-protocol|blocking:yes|mandatory-coordination:all-agents
+agent::role::python-dev:python-developer|responsibilities:code,modules,features,local-tests|blocking:no|coordinates:knowledge-manager
+agent::role::pi-infrastructure:pi-infrastructure-engineer|responsibilities:pi-config,ssh,systemd,pihole-setup|blocking:no|coordinates:knowledge-manager
+agent::role::uat:uat-pro|responsibilities:testing,verification,deployment,reports|blocking:no|autonomous:test-execution
+
+# GitScrum Workflows
+workflow::sprint::planning:sprint-planning-phase|duration:1-2h|steps:backlog-review,scope-definition,branch-creation,knowledge-update,agent-notification
+workflow::sprint::implementation:sprint-implementation-phase|duration:1.5-weeks|steps:feature-branches,python-dev-coord,uat-verify,pr-creation,merge-release
+workflow::sprint::review:sprint-review-phase|duration:2-3days|steps:verify-complete,deploy-test-pi,final-uat,request-approval,deploy-prod-pi,closure
+workflow::sprint::retrospective:sprint-retrospective-phase|duration:30min|steps:review-metrics,document-learnings,improvements,plan-next
+
+# Blocking Protocol
+protocol::blocking::request:agent-requests-update|step:1|action:agent-sends-kdl-entry|wait:true
+protocol::blocking::validate:knowledge-manager-validates|step:2|action:validate-syntax-update-file-commit|wait:agent-blocked
+protocol::blocking::confirm:knowledge-manager-confirms|step:3|action:send-confirmation-with-line-number|unblock:yes
+protocol::blocking::proceed:agent-proceeds|step:4|action:continue-with-task|knowledge:synchronized
+
+# Feature Development Workflow
+workflow::feature::create-branch:create-feature-branch|github:create-branch|base:main|name:feature/issue-N-description
+workflow::feature::implement:python-dev-implements|coord:python-developer|tests:local|notify:knowledge-manager
+workflow::feature::uat-dev:uat-verify-local|coord:uat-agent|env:local|tests:acceptance-criteria
+workflow::feature::pr:create-pull-request|github:create-pr|base:release/sprint-N|evidence:uat-screenshots|merge:after-approval
+workflow::feature::deploy-test:deploy-to-test-pi|coord:uat-agent|env:test-pi|tests:integration
+workflow::feature::merge:merge-to-release|git:merge-no-ff|delete:feature-branch|update:knowledge-manager
+
+# Bug Fix Workflow
+workflow::bug::triage:bug-triage|create:github-issue|label:bug,priority,component|sync:knowledge-manager|add:troubleshooting-kd
+workflow::bug::batch:batch-multiple-bugs|create:hotfix-branch|group:3-5-issues|coord:python-dev-pi-infrastructure
+workflow::bug::emergency:emergency-hotfix|assess:impact|expedite:implementation-uat|skip:some-steps|deploy:direct-prod-with-approval
+workflow::bug::fix:implement-fix|coord:python-developer|scope:minimal|tests:focused|notify:knowledge-manager
+workflow::bug::verify:verify-fix|coord:uat-agent|env:test-pi|tests:regression|approve:go-no-go
+
+# Deployment Coordination
+coord::deploy::local:local-testing|agent:python-dev|approval:none|tests:unit|knowledge:update-after
+coord::deploy::test-pi:test-pi-deployment|agent:uat|approval:auto-after-local|tests:integration-uat|knowledge:update-status
+coord::deploy::prod-pi:production-deployment|agent:scrum-leader|approval:user-required|tests:smoke|knowledge:update-deployed|monitor:mandatory
+
+# Agent Communication Patterns
+comm::request::delegation:scrum-leader-delegates|pattern:agent-task-for-issue-N|expects:completion-notification|wait:async
+comm::request::blocking:agent-requests-knowledge-update|pattern:knowledge-manager-update-kdl|expects:confirmation|wait:blocked-until-confirm
+comm::request::verification:agent-requests-uat|pattern:uat-verify-issue-N-env|expects:pass-fail-report|wait:async
+comm::request::approval:agent-requests-user-approval|pattern:user-approve-prod-deploy|expects:yes-no|wait:blocked-until-approval
+
+# Multi-Agent Coordination
+coord::multi::feature:feature-development|agents:scrum-leader,python-dev,uat,knowledge-manager|sequence:sequential|blocking:knowledge-manager
+coord::multi::bug:bug-fix|agents:scrum-leader,python-dev-or-pi-infra,uat,knowledge-manager|sequence:sequential|blocking:knowledge-manager
+coord::multi::sprint:sprint-execution|agents:all|sequence:parallel-within-phase|blocking:knowledge-manager|sync:sprint-milestones
+coord::multi::deployment:deployment-coordination|agents:scrum-leader,uat,knowledge-manager|sequence:sequential|blocking:approval+knowledge
+
+# Quality Gates
+gate::local::tests:local-tests-pass|required:yes|blocker:yes|owner:python-dev
+gate::test-pi::uat:test-pi-uat-pass|required:yes|blocker:yes|owner:uat-agent
+gate::knowledge::sync:knowledge-base-updated|required:yes|blocker:yes|owner:knowledge-manager
+gate::prod::approval:user-approval-granted|required:yes|blocker:yes|owner:user
+gate::prod::health:health-checks-pass|required:yes|blocker:yes|owner:pi-infrastructure

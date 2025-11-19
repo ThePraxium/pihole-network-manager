@@ -1,0 +1,36 @@
+# Pi-hole Network Manager - Deployment Flows (KDL)
+# Ultra-compact knowledge base for deployment procedures and sprint tracking
+# Format: <category>::<type>::<name>:<primary-id>|<key>:<value>|<key>:<value>...
+
+# Development Environment
+env::dev::config:local-computer|python:3.11+|venv:auto|testing:unit|pi:not-required
+deploy::dev::test:python3 main.py|env:local|approval:none|autonomy:full
+
+# Test Pi Environment
+env::test-pi::config:test-raspberry-pi|host:test-pi.local|location:/opt/pihole-network-manager|exec:local
+deploy::test-pi::install:git-clone-and-setup|method:git-clone|script:initial-setup.sh|approval:autonomous
+deploy::test-pi::health-check:local-health-checks|dns:verify|pihole:verify|services:verify
+
+# Production Pi Environment
+env::prod-pi::config:production|host:pihole.local|location:/opt/pihole-network-manager|network-critical:true
+deploy::prod-pi::install:git-clone-and-setup|method:git-clone|script:initial-setup.sh|approval:required|user-confirm:mandatory
+deploy::prod-pi::health-check:local-health-checks|dns:critical|pihole:critical|services:critical|network-impact:all-devices
+deploy::prod-pi::rollback:git-revert|method:git-checkout|git:revert-commit|approval:required
+
+# Sprint Tracking (Examples - update as sprints progress)
+# deploy::sprint::sprint-N:release/sprint-N|start-date:YYYY-MM-DD|issues:#X,#Y,#Z|status:planned|duration:2-weeks
+
+# Rollback Procedures
+deploy::rollback::code:git-revert|method:git-checkout|branch:previous|verify:local-test|approval:required
+deploy::rollback::config:restore-backup|method:manual-restore|files:config-yaml|approval:required
+deploy::rollback::pihole:pihole-reconfigure|method:pihole-repair|command:pihole -r|sudo:true
+
+# Deployment Stages
+deploy::stage::local:development|tests:unit|approval:none|git:feature-branch|exec:local
+deploy::stage::test-pi:integration|tests:uat|approval:auto-after-local|git:release-branch|exec:on-pi
+deploy::stage::prod-pi:production|tests:smoke|approval:user-required|git:main-branch|network-impact:critical|exec:on-pi
+
+# Deployment Method (Local Execution)
+deploy::method::git:git-clone|location:/opt/pihole-network-manager|permissions:user-owned|exec:local-on-pi
+deploy::method::setup:initial-setup.sh|sudo:required|creates:venv,sudoers,state|run-once:true
+deploy::method::update:git-pull|venv:update|script:none|restart:manual

@@ -1,0 +1,43 @@
+# Sudoers configuration for Pi-hole Network Manager
+# Allows specific commands to run without password prompt
+#
+# Installation: sudo cp this file to /etc/sudoers.d/pihole-manager
+# Permissions: sudo chmod 0440 /etc/sudoers.d/pihole-manager
+#
+# SECURITY NOTE: This grants passwordless sudo for specific commands only.
+# The user can ONLY run these exact commands without a password.
+
+# SQLite database access (for Pi-hole database queries)
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/sqlite3
+
+# Pi-hole commands (for Pi-hole management operations)
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/local/bin/pihole
+
+# Systemd service control (for restarting services)
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart pihole-FTL
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart dnsmasq
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop pihole-FTL
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/systemctl start pihole-FTL
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/systemctl status pihole-FTL
+
+# Firewall control (for router integration features)
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/sbin/ufw status
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/sbin/ufw allow *
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/sbin/ufw deny *
+
+# File operations (for config file access)
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/cat /etc/pihole/*
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/tee /etc/pihole/*
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/cat /var/log/pihole/*
+
+# Network diagnostics (for health check features)
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/ping -c *
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/dig *
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/nslookup *
+
+# Maintenance operations (for update/upgrade features)
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/apt-get update
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/apt-get upgrade -y
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/apt-get dist-upgrade -y
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/apt-get autoremove -y
+%pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/apt-get autoclean
