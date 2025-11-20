@@ -1,4 +1,4 @@
-#!/opt/pihole-manager/venv/bin/python3
+#!/usr/bin/env python3
 
 """
 Pi-hole Network Manager - Setup Orchestrator
@@ -15,6 +15,9 @@ import json
 import argparse
 from datetime import datetime
 from pathlib import Path
+
+# Get project root (this file is in pi-setup/ subdirectory)
+PROJECT_ROOT = Path(__file__).parent.parent
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -38,10 +41,10 @@ except ImportError as e:
 console = Console()
 
 # Configuration paths
-CONFIG_DIR = Path("/opt/pihole-manager")
-CONFIG_FILE = CONFIG_DIR / "config.yaml"
-STATE_FILE = CONFIG_DIR / "setup_state.json"
-LOG_FILE = Path("/var/log/pihole-manager/setup.log")
+CONFIG_DIR = PROJECT_ROOT
+CONFIG_FILE = PROJECT_ROOT / "config.yaml"
+STATE_FILE = PROJECT_ROOT / "setup_state.json"
+LOG_FILE = PROJECT_ROOT / "logs" / "setup.log"
 
 
 class SetupState:

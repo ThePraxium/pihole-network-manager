@@ -21,6 +21,7 @@ wheels/
 *.egg
 
 # Virtual Environment
+.venv/
 venv/
 ENV/
 env/
@@ -41,6 +42,10 @@ logs/*.log
 
 # State files
 state.json
+setup_state.json
+
+# Runtime data directory
+data/
 
 # OS
 .DS_Store

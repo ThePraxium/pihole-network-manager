@@ -9,7 +9,7 @@ import yaml
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from core.local_executor import execute_command, read_file, file_exists
-from core.config import Config
+from core.config import Config, get_project_root
 from core.ui import (
     console, show_menu, show_table, show_status, show_error,
     show_success, show_warning, confirm_action, wait_for_enter,
@@ -17,7 +17,7 @@ from core.ui import (
 )
 
 
-PROFILES_DIR = "/opt/pihole-manager/profiles"
+PROFILES_DIR = get_project_root() / "profiles"
 
 
 def run(config: Config):

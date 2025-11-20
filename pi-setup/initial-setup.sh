@@ -46,6 +46,10 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# Determine project root (parent of pi-setup directory where this script lives)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
 # Banner
 clear
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -96,66 +100,29 @@ apt-get install -y -qq \
     python3-requests \
     python3-cryptography
 
-# Create virtual environment for packages not available via apt
-log_info "Creating virtual environment for additional packages..."
-python3 -m venv /opt/pihole-manager/venv
-
-# Install remaining packages in venv (tplinkrouterc6u not in Debian repos)
-log_info "Installing additional packages in virtual environment..."
-/opt/pihole-manager/venv/bin/pip install --quiet --upgrade pip
-/opt/pihole-manager/venv/bin/pip install --quiet tplinkrouterc6u
+# Note: Virtual environment will be created automatically by main.py on first run
+log_info "Skipping venv creation (will be auto-created on first run)..."
 
 log_success "Python packages installed (system + venv)"
 
-# Step 5: Create directory structure
+# Step 5: Create directory structure within project
 log_info "Step 5/8: Creating directory structure..."
 
-# Create main directories
-mkdir -p /opt/pihole-manager/{setup,api,backups,logs}
+# Create project subdirectories
+mkdir -p "$PROJECT_ROOT"/{data,logs,profiles}
 mkdir -p /etc/pihole/profiles
-mkdir -p /var/log/pihole-manager
 
 # Set permissions
-chmod 755 /opt/pihole-manager
+chmod 755 "$PROJECT_ROOT"/data
+chmod 755 "$PROJECT_ROOT"/logs
+chmod 755 "$PROJECT_ROOT"/profiles
 chmod 755 /etc/pihole/profiles
-chmod 755 /var/log/pihole-manager
 
 log_success "Directory structure created"
 
-# Step 6: Copy setup files (if they exist in current directory)
-log_info "Step 6/8: Checking for setup files..."
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-if [ -d "$SCRIPT_DIR/setup" ]; then
-    log_info "Copying setup modules to /opt/pihole-manager/setup/"
-    cp -r "$SCRIPT_DIR/setup/"* /opt/pihole-manager/setup/
-    log_success "Setup modules copied"
-else
-    log_warning "Setup modules not found in $SCRIPT_DIR/setup/"
-    log_warning "Please manually copy setup files to /opt/pihole-manager/setup/"
-fi
-
-if [ -f "$SCRIPT_DIR/setup.py" ]; then
-    log_info "Copying setup orchestrator..."
-    cp "$SCRIPT_DIR/setup.py" /opt/pihole-manager/
-    chmod +x /opt/pihole-manager/setup.py
-    log_success "Setup orchestrator installed"
-else
-    log_warning "setup.py not found in $SCRIPT_DIR"
-fi
-
-if [ -d "$SCRIPT_DIR/api" ]; then
-    log_info "Copying API backend..."
-    cp -r "$SCRIPT_DIR/api/"* /opt/pihole-manager/api/
-    log_success "API backend installed"
-fi
-
-if [ -d "$SCRIPT_DIR/profiles" ]; then
-    log_info "Copying blocklist profiles..."
-    cp -r "$SCRIPT_DIR/profiles/"* /etc/pihole/profiles/
-    log_success "Blocklist profiles installed"
-fi
+# Step 6: Setup files are already in place (git cloned)
+log_info "Step 6/8: Verifying project structure..."
+log_success "Project files found at $PROJECT_ROOT"
 
 # Step 7: Install sudoers configuration
 log_info "Step 7/8: Configuring sudo permissions..."
@@ -194,8 +161,8 @@ fi
 
 # Step 8: Create initial log file
 log_info "Step 8/8: Initializing logging..."
-touch /var/log/pihole-manager/setup.log
-chmod 644 /var/log/pihole-manager/setup.log
+touch "$PROJECT_ROOT/logs/setup.log"
+chmod 644 "$PROJECT_ROOT/logs/setup.log"
 log_success "Logging initialized"
 
 # Bootstrap complete
@@ -212,22 +179,21 @@ echo "  • Kernel: $(uname -r)"
 echo "  • Architecture: $(uname -m)"
 echo ""
 
-# Check if setup.py exists
-if [ -f "/opt/pihole-manager/setup.py" ]; then
+# Verify main.py exists (entry point)
+if [ -f "$PROJECT_ROOT/main.py" ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     log_info "Next Steps:"
     echo ""
-    echo "  1. Review the configuration in setup.py"
-    echo "  2. Run the Python setup orchestrator via the management tool"
+    echo "  1. Run the application: python3 $PROJECT_ROOT/main.py"
+    echo "  2. Venv will be created automatically on first run"
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 
-    # Bootstrap complete - setup wizard should be run separately via remote management
-    log_info "Bootstrap complete. Run setup wizard via management tool."
+    log_info "Bootstrap complete. You can now run the application."
 else
-    log_warning "Setup orchestrator not found at /opt/pihole-manager/setup.py"
-    log_warning "Please copy the setup files manually and run setup.py"
+    log_warning "Main application not found at $PROJECT_ROOT/main.py"
+    log_warning "Please verify the repository was cloned correctly"
 fi
 
 log_success "Initial setup complete!"

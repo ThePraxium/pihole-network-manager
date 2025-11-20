@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from core.local_executor import execute_command, read_file, write_file, file_exists
-from core.config import Config
+from core.config import Config, get_project_root
 from core.ui import (
     console, show_menu, show_table, show_status, show_error,
     show_success, show_warning, confirm_action, wait_for_enter,
@@ -17,7 +17,7 @@ from core.ui import (
 )
 
 
-RULES_FILE = "/opt/pihole-manager/content_filter_rules.json"
+RULES_FILE = get_project_root() / "data" / "content_filter_rules.json"
 
 
 # Predefined website categories

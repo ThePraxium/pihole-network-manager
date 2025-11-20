@@ -23,7 +23,7 @@ def ensure_venv():
     )
 
     if not in_venv:
-        venv_path = Path.home() / '.pihole-manager-venv'
+        venv_path = Path(__file__).parent / '.venv'
 
         if not venv_path.exists():
             print("Creating virtual environment...")
@@ -70,8 +70,27 @@ def ensure_venv():
         os.execv(str(python), [str(python)] + sys.argv)
 
 
+def ensure_directories():
+    """
+    Ensure required project subdirectories exist.
+    Creates data/, logs/, and profiles/ if they don't exist.
+    """
+    project_root = Path(__file__).parent
+    required_dirs = [
+        project_root / "data",
+        project_root / "logs",
+        project_root / "profiles"
+    ]
+
+    for directory in required_dirs:
+        directory.mkdir(parents=True, exist_ok=True)
+
+
 # Ensure virtual environment before importing anything else
 ensure_venv()
+
+# Ensure required directories exist
+ensure_directories()
 
 
 # Now safe to import our modules

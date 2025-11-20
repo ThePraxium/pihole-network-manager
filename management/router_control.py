@@ -7,7 +7,7 @@ DHCP information, bandwidth monitoring, and remote operations.
 
 from typing import List, Dict, Any, Optional
 from core.local_executor import execute_command, read_file, write_file
-from core.config import Config
+from core.config import Config, get_project_root
 from core.ui import (
     console, show_menu, show_table, show_status, show_error,
     show_success, show_warning, confirm_action, wait_for_enter,
@@ -395,7 +395,7 @@ def run_router_command(config: Config, command: str, params: Optional[Dict[str, 
             return {"error": "Password required"}
     elif automation_mode:
         # Load encrypted password from local file
-        success, password_content = read_file("/opt/pihole-manager/router_credentials.enc")
+        success, password_content = read_file(str(get_project_root() / "data" / "router_credentials.enc"))
 
         if success and password_content:
             # Decrypt locally

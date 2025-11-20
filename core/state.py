@@ -9,10 +9,11 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
+from core.config import get_project_root
 
 
-# For local Pi execution, store state on the Pi itself
-DEFAULT_STATE_FILE = Path("/opt/pihole-manager/state.json")
+# For local Pi execution, store state in the project root
+DEFAULT_STATE_FILE = get_project_root() / "state.json"
 
 
 class State:
@@ -23,7 +24,7 @@ class State:
         Initialize state tracker
 
         Args:
-            state_file: Path to state file (default: ~/.config/pihole-manager/state.json)
+            state_file: Path to state file (default: <project-root>/state.json)
         """
         self.state_file = state_file or DEFAULT_STATE_FILE
         self.state = self.load()

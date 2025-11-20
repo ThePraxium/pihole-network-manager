@@ -13,8 +13,9 @@ import base64
 import hashlib
 
 
-DEFAULT_CONFIG_DIR = Path.home() / ".config" / "pihole-manager"
-DEFAULT_CONFIG_FILE = DEFAULT_CONFIG_DIR / "config.yaml"
+def get_project_root() -> Path:
+    """Get the project root directory (where main.py lives)."""
+    return Path(__file__).parent.parent
 
 
 class Config:
@@ -25,9 +26,9 @@ class Config:
         Initialize configuration manager
 
         Args:
-            config_path: Path to config file (default: ~/.config/pihole-manager/config.yaml)
+            config_path: Path to config file (default: <project-root>/config.yaml)
         """
-        self.config_path = config_path or DEFAULT_CONFIG_FILE
+        self.config_path = config_path or (get_project_root() / "config.yaml")
         self.config_dir = self.config_path.parent
         self.config = self.load()
 
