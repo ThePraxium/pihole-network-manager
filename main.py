@@ -317,33 +317,33 @@ def main_menu():
         # console.clear()  # Disabled to preserve scroll history
         show_banner()
         console.print()
-        show_warning("Initial setup not complete!")
+        show_warning("Pi-hole configuration not complete!")
         console.print()
-        console.print("[bold]Pi-hole Network Manager must be set up before use.[/bold]")
+        console.print("[bold]The system is bootstrapped, but Pi-hole needs to be configured.[/bold]")
         console.print()
 
         # Get actual project root dynamically
         project_root = Path(__file__).parent
-        setup_script = project_root / "pi-setup" / "initial-setup.sh"
+        setup_script = project_root / "pi-setup" / "setup.py"
 
-        console.print("Would you like to run the initial setup now?")
+        console.print("Would you like to run the Pi-hole configuration wizard now?")
         console.print()
-        console.print("  [cyan]Option 1:[/cyan] Run setup automatically (recommended)")
-        console.print("  [cyan]Option 2:[/cyan] Run setup manually")
+        console.print("  [cyan]Option 1:[/cyan] Run setup wizard automatically (recommended)")
+        console.print("  [cyan]Option 2:[/cyan] Run setup wizard manually")
         console.print()
 
         choice = Prompt.ask("Select option", choices=["1", "2"], default="1")
 
         if choice == "1":
             console.print()
-            console.print("[bold cyan]Running initial setup...[/bold cyan]")
+            console.print("[bold cyan]Running Pi-hole configuration wizard...[/bold cyan]")
             console.print()
             console.print("[dim]Note: This will require sudo privileges[/dim]")
             console.print()
 
             import subprocess
             result = subprocess.run(
-                ["sudo", str(setup_script)],
+                ["sudo", "python3", str(setup_script)],
                 cwd=str(project_root)
             )
 
@@ -362,10 +362,10 @@ def main_menu():
             sys.exit(0)
         else:
             console.print()
-            console.print("To run setup manually:")
+            console.print("To run setup wizard manually:")
             console.print()
             console.print(f"  [cyan]cd {project_root}[/cyan]")
-            console.print(f"  [cyan]sudo ./pi-setup/initial-setup.sh[/cyan]")
+            console.print(f"  [cyan]sudo python3 pi-setup/setup.py[/cyan]")
             console.print()
             console.print("After setup is complete, run this application again:")
             console.print(f"  [cyan]python3 {project_root}/main.py[/cyan]")
