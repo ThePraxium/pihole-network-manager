@@ -61,6 +61,18 @@ def ensure_venv():
                     print(f"✗ Failed to install dependencies: {e}")
                     sys.exit(1)
 
+        # Check if venv was created with wrong ownership (via sudo)
+        if venv_path.exists() and os.geteuid() != 0:
+            venv_owner = venv_path.stat().st_uid
+            current_user = os.geteuid()
+
+            if venv_owner == 0 and current_user != 0:
+                print()
+                print("⚠ Warning: Virtual environment was created with sudo")
+                print(f"  To fix permissions, run:")
+                print(f"  sudo chown -R $USER:$USER {venv_path}")
+                print()
+
         # Re-execute in virtual environment
         print()
         print("Launching in virtual environment...")
@@ -317,18 +329,60 @@ def main_menu():
         # console.clear()  # Disabled to preserve scroll history
         show_banner()
         console.print()
-        show_error("Initial setup not complete!")
+        show_warning("Initial setup not complete!")
         console.print()
         console.print("[bold]Pi-hole Network Manager must be set up before use.[/bold]")
         console.print()
-        console.print("Please run the initial setup script on your Raspberry Pi:")
+
+        # Get actual project root dynamically
+        project_root = Path(__file__).parent
+        setup_script = project_root / "pi-setup" / "initial-setup.sh"
+
+        console.print("Would you like to run the initial setup now?")
         console.print()
-        console.print("  [cyan]cd /opt/pihole-manager[/cyan]")
-        console.print("  [cyan]sudo ./pi-setup/initial-setup.sh[/cyan]")
+        console.print("  [cyan]Option 1:[/cyan] Run setup automatically (recommended)")
+        console.print("  [cyan]Option 2:[/cyan] Run setup manually")
         console.print()
-        console.print("After setup is complete, you can run this manager.")
-        console.print()
-        sys.exit(1)
+
+        choice = Prompt.ask("Select option", choices=["1", "2"], default="1")
+
+        if choice == "1":
+            console.print()
+            console.print("[bold cyan]Running initial setup...[/bold cyan]")
+            console.print()
+            console.print("[dim]Note: This will require sudo privileges[/dim]")
+            console.print()
+
+            import subprocess
+            result = subprocess.run(
+                ["sudo", str(setup_script)],
+                cwd=str(project_root)
+            )
+
+            if result.returncode == 0:
+                console.print()
+                show_success("Setup completed successfully!")
+                console.print()
+                console.print("Please run this application again:")
+                console.print(f"  [cyan]python3 {project_root}/main.py[/cyan]")
+                console.print()
+            else:
+                console.print()
+                show_error("Setup failed or was cancelled")
+                console.print()
+
+            sys.exit(0)
+        else:
+            console.print()
+            console.print("To run setup manually:")
+            console.print()
+            console.print(f"  [cyan]cd {project_root}[/cyan]")
+            console.print(f"  [cyan]sudo ./pi-setup/initial-setup.sh[/cyan]")
+            console.print()
+            console.print("After setup is complete, run this application again:")
+            console.print(f"  [cyan]python3 {project_root}/main.py[/cyan]")
+            console.print()
+            sys.exit(1)
 
     while True:
         # console.clear()  # Disabled to preserve scroll history
