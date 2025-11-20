@@ -119,7 +119,7 @@ from core.logger import get_logger
 
 # Import management modules
 from management import blocklists, devices, lists, content_filter, stats
-from management import router_control, maintenance, health
+from management import maintenance, health
 
 
 def show_banner():
@@ -157,9 +157,8 @@ def management_menu(config: Config):
             "[3] Whitelist/Blacklist",
             "[4] Content Filtering",
             "[5] Statistics & Monitoring",
-            "[6] Router Control",
-            "[7] Maintenance & Updates",
-            "[8] Health & Diagnostics",
+            "[6] Maintenance & Updates",
+            "[7] Health & Diagnostics",
             "[0] Back to Main Menu"
         ]
 
@@ -170,7 +169,7 @@ def management_menu(config: Config):
 
         choice = Prompt.ask(
             "Select option",
-            choices=["1", "2", "3", "4", "5", "6", "7", "8", "0"],
+            choices=["1", "2", "3", "4", "5", "6", "7", "0"],
             default="0"
         )
 
@@ -185,10 +184,8 @@ def management_menu(config: Config):
         elif choice == "5":
             stats.run(config)
         elif choice == "6":
-            router_control.run(config)
-        elif choice == "7":
             maintenance.run(config)
-        elif choice == "8":
+        elif choice == "7":
             health.run(config)
         elif choice == "0":
             break
@@ -244,15 +241,6 @@ def view_configuration(config: Config):
     console.print()
     console.print(f"[bold]Pi-hole:[/bold]")
     console.print(f"  Web URL:  {config.get('pihole', 'web_url', 'Not configured')}")
-
-    console.print()
-    console.print(f"[bold]Router:[/bold]")
-    if config.get('router', 'enabled'):
-        console.print(f"  Enabled:  Yes")
-        console.print(f"  Host:     {config.get('router', 'host')}")
-        console.print(f"  User:     {config.get('router', 'user')}")
-    else:
-        console.print(f"  Enabled:  No")
 
     console.print()
     console.print(f"[bold]Config File:[/bold] {config.config_path}")

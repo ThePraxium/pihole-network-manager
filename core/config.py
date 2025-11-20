@@ -8,9 +8,6 @@ Enhanced for unified setup and management workflow.
 import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional
-from cryptography.fernet import Fernet
-import base64
-import hashlib
 
 
 def get_project_root() -> Path:
@@ -77,13 +74,6 @@ class Config:
             "pihole": {
                 "web_url": "http://localhost/admin"  # Local Pi-hole web interface
             },
-            "router": {
-                "enabled": False,
-                "host": "192.168.1.1",
-                "username": "admin",
-                "password": "",  # Encrypted
-                "automation_mode": False
-            },
             "preferences": {
                 "show_tips": True,
                 "confirm_actions": True
@@ -118,23 +108,6 @@ class Config:
 
         self.config[section][key] = value
 
-
-    def get_router_connection(self) -> Optional[Dict[str, Any]]:
-        """
-        Get router connection parameters
-
-        Returns:
-            Dictionary with host, username, password or None if disabled
-        """
-        if not self.get("router", "enabled", False):
-            return None
-
-        return {
-            "host": self.get("router", "host"),
-            "username": self.get("router", "username"),
-            "password": self.get("router", "password")
-        }
-
     def is_configured(self) -> bool:
         """
         Check if configuration is complete
@@ -159,65 +132,7 @@ class Config:
         if not self.get("pihole", "web_url"):
             errors.append("Pi-hole web URL is not configured")
 
-        # Check router configuration if enabled
-        if self.get("router", "enabled"):
-            if not self.get("router", "host"):
-                errors.append("Router host is not configured")
-
-            if not self.get("router", "username"):
-                errors.append("Router username is not configured")
-
         return len(errors) == 0, errors
-
-
-    def encrypt_password(self, password: str) -> str:
-        """
-        Encrypt password for storage
-
-        Args:
-            password: Plain text password
-
-        Returns:
-            Encrypted password
-        """
-        key = self._get_encryption_key()
-        f = Fernet(key)
-        encrypted = f.encrypt(password.encode())
-        return encrypted.decode()
-
-    def decrypt_password(self, encrypted_password: str) -> str:
-        """
-        Decrypt password
-
-        Args:
-            encrypted_password: Encrypted password
-
-        Returns:
-            Plain text password
-        """
-        if not encrypted_password:
-            return ""
-
-        try:
-            key = self._get_encryption_key()
-            f = Fernet(key)
-            decrypted = f.decrypt(encrypted_password.encode())
-            return decrypted.decode()
-        except Exception:
-            return encrypted_password  # Return as-is if not encrypted
-
-    def _get_encryption_key(self) -> bytes:
-        """
-        Generate encryption key from user-specific data
-
-        Returns:
-            Encryption key
-        """
-        # Use home directory path as basis for key
-        home_path = str(Path.home())
-        key_material = hashlib.sha256(home_path.encode()).digest()
-        return base64.urlsafe_b64encode(key_material)
-
 
     def __repr__(self) -> str:
         """String representation"""

@@ -5,7 +5,7 @@ Pi-hole Network Manager - Setup Orchestrator
 
 Interactive Python-based setup wizard that guides users through
 configuring their Pi-hole system with security hardening, network setup,
-SSH configuration, blocklist profiles, and router integration.
+SSH configuration, and blocklist profiles.
 """
 
 import os
@@ -32,7 +32,6 @@ try:
     from setup import pihole_install
     from setup import blocklist_manager
     from setup import performance_tuning
-    from setup import router_integration
     from setup import health_check
 except ImportError as e:
     print(f"Warning: Could not import setup modules: {e}")
@@ -66,7 +65,6 @@ class SetupState:
                 "pihole_install": {"status": "pending", "completed_at": None},
                 "blocklist_manager": {"status": "pending", "completed_at": None},
                 "performance_tuning": {"status": "pending", "completed_at": None},
-                "router_integration": {"status": "pending", "completed_at": None},
                 "health_check": {"status": "pending", "completed_at": None}
             },
             "setup_started": None,
@@ -125,14 +123,6 @@ class Configuration:
                 "dns_servers": ["1.1.1.1", "8.8.8.8"],
                 "admin_password": "",
                 "hostname": "pihole"
-            },
-            "router": {
-                "enabled": False,
-                "model": "TP-Link AXE5400",
-                "host": "192.168.1.1",
-                "username": "admin",
-                "password": "",
-                "automation_mode": False
             },
             "blocklists": {
                 "active_profile": "moderate"
@@ -196,7 +186,6 @@ def show_status_table(state):
         "pihole_install": "Pi-hole Installation",
         "blocklist_manager": "Blocklist Profiles",
         "performance_tuning": "Performance Tuning",
-        "router_integration": "Router Integration",
         "health_check": "Health Check"
     }
 
@@ -242,7 +231,6 @@ def run_module(module_name, config, state):
         "pihole_install": ("Pi-hole Installation", pihole_install),
         "blocklist_manager": ("Blocklist Manager", blocklist_manager),
         "performance_tuning": ("Performance Tuning", performance_tuning),
-        "router_integration": ("Router Integration", router_integration),
         "health_check": ("Health Check", health_check)
     }
 
@@ -288,7 +276,6 @@ def run_complete_setup(config, state):
         "pihole_install",
         "blocklist_manager",
         "performance_tuning",
-        "router_integration",
         "health_check"
     ]
 
@@ -332,8 +319,7 @@ def run_individual_module(config, state):
         "4": "pihole_install",
         "5": "blocklist_manager",
         "6": "performance_tuning",
-        "7": "router_integration",
-        "8": "health_check"
+        "7": "health_check"
     }
 
     console.print("\n[bold cyan]Select Module to Run:[/bold cyan]\n")
@@ -343,8 +329,7 @@ def run_individual_module(config, state):
     console.print("  [4] Pi-hole Installation")
     console.print("  [5] Blocklist Manager")
     console.print("  [6] Performance Tuning")
-    console.print("  [7] Router Integration")
-    console.print("  [8] Health Check")
+    console.print("  [7] Health Check")
     console.print("  [9] Back to Main Menu")
     console.print()
 
@@ -419,7 +404,6 @@ def main():
         config.update("pihole", "gateway", "auto")       # Auto-detect gateway
         config.update("pihole", "dns_servers", ["1.1.1.1", "1.0.0.1"])  # Cloudflare DNS
         config.update("blocklists", "active_profile", "moderate")
-        config.update("router", "enabled", False)        # Skip router integration
 
         console.print("[dim]Configuration defaults set[/dim]\n")
 
