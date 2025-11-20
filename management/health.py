@@ -18,7 +18,7 @@ from core.ui import (
 def run(config: Config):
     """Main health and diagnostics interface"""
     while True:
-        clear_screen()
+        # clear_screen()  # Disabled to preserve scroll history
         console.print("[bold cyan]Health & Diagnostics[/bold cyan]\n")
 
         options = [
@@ -56,7 +56,7 @@ def run(config: Config):
 
 def run_full_health_check():
     """Run comprehensive health check"""
-    clear_screen()
+    # clear_screen()  # Disabled to preserve scroll history
     console.print("[bold cyan]Full Health Check[/bold cyan]\n")
 
     tests = [

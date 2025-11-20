@@ -19,7 +19,7 @@ from core.ui import (
 def run(config: Config):
     """Main device management interface"""
     while True:
-        clear_screen()
+        # clear_screen()  # Disabled to preserve scroll history
         console.print("[bold cyan]Device Management[/bold cyan]\n")
 
         options = [

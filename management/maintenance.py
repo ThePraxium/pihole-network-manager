@@ -18,7 +18,7 @@ from core.ui import (
 def run(config: Config):
     """Main maintenance interface"""
     while True:
-        clear_screen()
+        # clear_screen()  # Disabled to preserve scroll history
         console.print("[bold cyan]Maintenance & Updates[/bold cyan]\n")
 
         options = [
@@ -191,7 +191,7 @@ def restart_system():
 
 def view_system_resources():
     """View system resource usage"""
-    clear_screen()
+    # clear_screen()  # Disabled to preserve scroll history
     console.print("[bold cyan]System Resources[/bold cyan]\n")
 
     show_status("Fetching system information...", "info")
@@ -304,7 +304,7 @@ def repair_pihole():
 
 def view_service_status():
     """View status of Pi-hole related services"""
-    clear_screen()
+    # clear_screen()  # Disabled to preserve scroll history
     console.print("[bold cyan]Service Status[/bold cyan]\n")
 
     services = [

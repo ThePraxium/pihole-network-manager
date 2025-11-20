@@ -79,7 +79,7 @@ WEBSITE_CATEGORIES = {
 def run(config: Config):
     """Main content filtering interface"""
     while True:
-        clear_screen()
+        # clear_screen()  # Disabled to preserve scroll history
         console.print("[bold cyan]Content Filtering[/bold cyan]\n")
 
         options = [

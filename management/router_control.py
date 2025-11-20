@@ -25,7 +25,7 @@ def run(config: Config):
         return
 
     while True:
-        clear_screen()
+        # clear_screen()  # Disabled to preserve scroll history
         console.print("[bold cyan]Router Control[/bold cyan]\n")
 
         options = [

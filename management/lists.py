@@ -20,7 +20,7 @@ from core.ui import (
 def run(config: Config):
     """Main whitelist/blacklist management interface"""
     while True:
-        clear_screen()
+        # clear_screen()  # Disabled to preserve scroll history
         console.print("[bold cyan]Whitelist / Blacklist Management[/bold cyan]\n")
 
         options = [

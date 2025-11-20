@@ -20,7 +20,7 @@ from core.ui import (
 def run(config: Config):
     """Main statistics and monitoring interface"""
     while True:
-        clear_screen()
+        # clear_screen()  # Disabled to preserve scroll history
         console.print("[bold cyan]Statistics & Monitoring[/bold cyan]\n")
 
         options = [
@@ -61,7 +61,7 @@ def run(config: Config):
 
 def show_dashboard(config: Config):
     """Display comprehensive Pi-hole dashboard"""
-    clear_screen()
+    # clear_screen()  # Disabled to preserve scroll history
     console.print("[bold cyan]Pi-hole Dashboard[/bold cyan]\n")
 
     show_status("Loading dashboard...", "info")

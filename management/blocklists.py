@@ -23,7 +23,7 @@ PROFILES_DIR = get_project_root() / "profiles"
 def run(config: Config):
     """Main blocklist management interface"""
     while True:
-        clear_screen()
+        # clear_screen()  # Disabled to preserve scroll history
         console.print("[bold cyan]Blocklist Management[/bold cyan]\n")
 
         options = [

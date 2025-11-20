@@ -132,7 +132,7 @@ def management_menu(config: Config):
         config: Configuration object
     """
     while True:
-        console.clear()
+        # console.clear()  # Disabled to preserve scroll history
         show_banner()
 
         console.print()
@@ -190,7 +190,7 @@ def configuration_menu(config: Config):
         config: Configuration object
     """
     while True:
-        console.clear()
+        # console.clear()  # Disabled to preserve scroll history
         show_banner()
 
         console.print()
@@ -220,7 +220,7 @@ def configuration_menu(config: Config):
 
 def view_configuration(config: Config):
     """Display current configuration"""
-    console.clear()
+    # console.clear()  # Disabled to preserve scroll history
     show_banner()
 
     console.print()
@@ -258,15 +258,63 @@ def edit_connection_settings(config: Config):
     Prompt.ask("Press Enter to continue")
 
 
+def migrate_setup_state():
+    """
+    Migrate setup_state.json to state.json if needed.
+    This bridges the gap between the setup wizard and the main app.
+    """
+    project_root = Path(__file__).parent
+    setup_state_file = project_root / "setup_state.json"
+    state_file = project_root / "state.json"
+
+    # If state.json already exists, nothing to do
+    if state_file.exists():
+        return
+
+    # If setup_state.json exists and setup completed, create state.json
+    if setup_state_file.exists():
+        import json
+        try:
+            with open(setup_state_file, 'r') as f:
+                setup_state = json.load(f)
+
+            # Check if health_check completed (last step)
+            if setup_state.get('modules', {}).get('health_check', {}).get('status') == 'completed':
+                # Create state.json with setup_complete flag
+                completed_at = setup_state.get('modules', {}).get('health_check', {}).get('completed_at')
+                state_data = {
+                    "setup": {
+                        "setup_complete": True
+                    },
+                    "timestamps": {
+                        "setup_complete": completed_at
+                    },
+                    "metadata": {
+                        "created_at": setup_state.get('setup_started'),
+                        "last_updated": completed_at
+                    }
+                }
+
+                with open(state_file, 'w') as f:
+                    json.dump(state_data, f, indent=2)
+
+                print(f"✓ Migrated setup state to {state_file}")
+        except Exception as e:
+            print(f"Warning: Could not migrate setup state: {e}")
+
+
 def main_menu():
     """Main application menu"""
+    # Migrate setup state if needed
+    migrate_setup_state()
+
     # Load configuration and state
     config = Config()
     state = State()
 
     # Check if initial setup has been completed
     if not state.is_setup_complete():
-        console.clear()
+        # console.clear()  # Disabled to preserve scroll history
         show_banner()
         console.print()
         show_error("Initial setup not complete!")
@@ -283,7 +331,7 @@ def main_menu():
         sys.exit(1)
 
     while True:
-        console.clear()
+        # console.clear()  # Disabled to preserve scroll history
         show_banner()
 
         console.print()
@@ -318,7 +366,7 @@ def main_menu():
         elif choice == "2":
             configuration_menu(config)
         elif choice == "0":
-            console.clear()
+            # console.clear()  # Disabled to preserve scroll history
             console.print()
             console.print("[bold cyan]Thank you for using Pi-hole Network Manager![/bold cyan]")
             console.print()

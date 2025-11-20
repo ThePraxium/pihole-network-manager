@@ -112,6 +112,16 @@ log_info "Step 5/8: Creating directory structure..."
 mkdir -p "$PROJECT_ROOT"/{data,logs,profiles}
 mkdir -p /etc/pihole/profiles
 
+# Get the user who ran sudo (for proper ownership)
+SUDO_USER_NAME=${SUDO_USER:-$(whoami)}
+
+# Set ownership to the user who ran sudo
+if [ "$SUDO_USER_NAME" != "root" ]; then
+    chown -R "$SUDO_USER_NAME":"$SUDO_USER_NAME" "$PROJECT_ROOT"/data
+    chown -R "$SUDO_USER_NAME":"$SUDO_USER_NAME" "$PROJECT_ROOT"/logs
+    chown -R "$SUDO_USER_NAME":"$SUDO_USER_NAME" "$PROJECT_ROOT"/profiles
+fi
+
 # Set permissions
 chmod 755 "$PROJECT_ROOT"/data
 chmod 755 "$PROJECT_ROOT"/logs
