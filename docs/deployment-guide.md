@@ -243,17 +243,17 @@ sequenceDiagram
 **Deployment Script**:
 ```bash
 # Connect and transfer
-ssh pi@test-pi.local "mkdir -p /opt/pihole-manager"
-scp -r * pi@test-pi.local:/opt/pihole-manager/
+ssh pi@test-pi.local "mkdir -p ~/pihole-network-manager"
+scp -r * pi@test-pi.local:~/pihole-network-manager/
 
 # Execute setup
-ssh pi@test-pi.local "cd /opt/pihole-manager && sudo python3 setup.py"
+ssh pi@test-pi.local "cd ~/pihole-network-manager && sudo python3 setup.py"
 
 # Run integration tests
-ssh pi@test-pi.local "cd /opt/pihole-manager && pytest tests/integration/"
+ssh pi@test-pi.local "cd ~/pihole-network-manager && pytest tests/integration/"
 
 # Health check
-ssh pi@test-pi.local "cd /opt/pihole-manager && python3 health_check.py"
+ssh pi@test-pi.local "cd ~/pihole-network-manager && python3 health_check.py"
 ```
 
 **Characteristics**:
@@ -320,17 +320,17 @@ sequenceDiagram
 # USER MUST APPROVE BEFORE PROCEEDING
 
 # Create backup
-ssh pi@pihole.local "sudo /opt/pihole-manager/backup.sh"
+ssh pi@pihole.local "sudo ~/pihole-network-manager/backup.sh"
 
 # Transfer files
-ssh pi@pihole.local "mkdir -p /opt/pihole-manager-new"
-scp -r * pi@pihole.local:/opt/pihole-manager-new/
+ssh pi@pihole.local "mkdir -p ~/pihole-network-manager-new"
+scp -r * pi@pihole.local:~/pihole-network-manager-new/
 
 # Deploy (with rollback capability)
 ssh pi@pihole.local "
-    sudo mv /opt/pihole-manager /opt/pihole-manager-backup &&
-    sudo mv /opt/pihole-manager-new /opt/pihole-manager &&
-    cd /opt/pihole-manager &&
+    sudo mv ~/pihole-network-manager ~/pihole-network-manager-backup &&
+    sudo mv ~/pihole-network-manager-new ~/pihole-network-manager &&
+    cd ~/pihole-network-manager &&
     sudo python3 setup.py
 "
 
@@ -338,7 +338,7 @@ ssh pi@pihole.local "
 ssh pi@pihole.local "dig @localhost google.com"
 
 # Health check
-ssh pi@pihole.local "cd /opt/pihole-manager && python3 health_check.py"
+ssh pi@pihole.local "cd ~/pihole-network-manager && python3 health_check.py"
 
 # Monitor
 ssh pi@pihole.local "journalctl -u pihole-FTL -f --since '5 minutes ago'"
@@ -406,21 +406,21 @@ git push origin main
 
 # Redeploy
 ssh pi@pihole.local "
-    cd /opt/pihole-manager &&
+    cd ~/pihole-network-manager &&
     git pull &&
     sudo systemctl restart pihole-manager
 "
 
 # Verify
-ssh pi@pihole.local "cd /opt/pihole-manager && python3 health_check.py"
+ssh pi@pihole.local "cd ~/pihole-network-manager && python3 health_check.py"
 ```
 
 **Config Rollback**:
 ```bash
 # Restore from backup
 ssh pi@pihole.local "
-    sudo cp /opt/pihole-manager-backup/config.yaml /opt/pihole-manager/ &&
-    sudo cp /opt/pihole-manager-backup/gravity.db /etc/pihole/ &&
+    sudo cp ~/pihole-network-manager-backup/config.yaml ~/pihole-network-manager/ &&
+    sudo cp ~/pihole-network-manager-backup/gravity.db /etc/pihole/ &&
     sudo systemctl restart pihole-FTL
 "
 
@@ -693,21 +693,21 @@ monitoring: post-deploy-required
 
 **Deploy to Test Pi**:
 ```bash
-ssh pi@test-pi.local "mkdir -p /opt/pihole-manager"
-scp -r * pi@test-pi.local:/opt/pihole-manager/
-ssh pi@test-pi.local "cd /opt/pihole-manager && sudo python3 setup.py"
+ssh pi@test-pi.local "mkdir -p ~/pihole-network-manager"
+scp -r * pi@test-pi.local:~/pihole-network-manager/
+ssh pi@test-pi.local "cd ~/pihole-network-manager && sudo python3 setup.py"
 ```
 
 **Deploy to Production** (after approval):
 ```bash
-ssh pi@pihole.local "sudo /opt/pihole-manager/backup.sh"
-scp -r * pi@pihole.local:/opt/pihole-manager-new/
-ssh pi@pihole.local "sudo mv /opt/pihole-manager /opt/pihole-manager-backup && sudo mv /opt/pihole-manager-new /opt/pihole-manager"
-ssh pi@pihole.local "cd /opt/pihole-manager && python3 health_check.py"
+ssh pi@pihole.local "sudo ~/pihole-network-manager/backup.sh"
+scp -r * pi@pihole.local:~/pihole-network-manager-new/
+ssh pi@pihole.local "sudo mv ~/pihole-network-manager ~/pihole-network-manager-backup && sudo mv ~/pihole-network-manager-new ~/pihole-network-manager"
+ssh pi@pihole.local "cd ~/pihole-network-manager && python3 health_check.py"
 ```
 
 **Rollback**:
 ```bash
-ssh pi@pihole.local "sudo mv /opt/pihole-manager /opt/pihole-manager-failed && sudo mv /opt/pihole-manager-backup /opt/pihole-manager"
+ssh pi@pihole.local "sudo mv ~/pihole-network-manager ~/pihole-network-manager-failed && sudo mv ~/pihole-network-manager-backup ~/pihole-network-manager"
 ssh pi@pihole.local "sudo systemctl restart pihole-FTL"
 ```

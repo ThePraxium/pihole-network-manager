@@ -136,7 +136,7 @@ router:
 
 ### Pi-Side Configuration
 
-**Path**: `/opt/pihole-manager/config.yaml` (on Raspberry Pi)
+**Path**: `~/pihole-network-manager/config.yaml` (on Raspberry Pi)
 
 **Example**:
 ```yaml
@@ -261,7 +261,7 @@ source ~/.pihole-manager-venv/bin/activate
 
 ### Pi Environment
 
-**Application Root**: `/opt/pihole-manager/`
+**Application Root**: `~/pihole-network-manager/`
 
 **Python**: System Python 3 (no venv on Pi)
 
@@ -378,7 +378,7 @@ Scrum Leader: "✅ Deployment complete"
 
 **Fix**:
 1. Local config: `~/.config/pihole-manager/config.yaml`
-2. Pi config: `/opt/pihole-manager/config.yaml`
+2. Pi config: `~/pihole-network-manager/config.yaml`
 3. These are **separate files** - update both if needed
 
 ---

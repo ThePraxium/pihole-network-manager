@@ -193,8 +193,8 @@ execute_command("pihole status", sudo=True)
 ### 5. Config File Location
 
 ```
-Pi Configuration:  /opt/pihole-manager/config.yaml
-State Tracking:    /opt/pihole-manager/state.json
+Pi Configuration:  ~/pihole-network-manager/config.yaml
+State Tracking:    ~/pihole-network-manager/state.json
 Sudoers Config:    /etc/sudoers.d/pihole-manager
 ```
 
@@ -208,9 +208,9 @@ All configuration resides on the Pi where the manager runs.
 |----------|----------|---------------|
 | Gravity Database | `/etc/pihole/gravity.db` | Write: Yes |
 | FTL Database | `/etc/pihole/pihole-FTL.db` | Read: Yes |
-| Blocklist Profiles | `/etc/pihole/profiles/*.yaml` | Yes |
-| State File | `/opt/pihole-manager/state.json` | Yes |
-| Config File | `/opt/pihole-manager/config.yaml` | Yes |
+| Blocklist Profiles | `~/pihole-network-manager/profiles/*.yaml` | No |
+| State File | `~/pihole-network-manager/state.json` | No |
+| Config File | `~/pihole-network-manager/config.yaml` | No |
 | Sudoers Config | `/etc/sudoers.d/pihole-manager` | Yes (read-only) |
 | Session Logs | `/tmp/pihole-manager-*.log` | No |
 

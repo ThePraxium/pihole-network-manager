@@ -42,7 +42,7 @@ The Pi-hole Network Manager is a **Python 3.11+ application** that runs **direct
 │         Raspberry Pi (pihole.local)            │
 │  ┌──────────────────────────────────────────┐ │
 │  │   Pi-hole Network Manager (Python App)   │ │
-│  │   Location: /opt/pihole-network-manager   │ │
+│  │   Location: ~/pihole-network-manager   │ │
 │  │                                            │ │
 │  │   ┌────────────┐  ┌────────────────────┐ │ │
 │  │   │  main.py   │  │  Management        │ │ │
@@ -668,7 +668,7 @@ config.encrypt_router_password('password123')
 password = config.decrypt_router_password()
 ```
 
-**Configuration Structure** (`/opt/pihole-manager/config.yaml`):
+**Configuration Structure** (`~/pihole-network-manager/config.yaml`):
 ```yaml
 pihole:
   web_url: "http://pihole.local/admin"
@@ -680,7 +680,7 @@ router:  # Optional
   password_encrypted: "<base64>"
 ```
 
-**Configuration Location**: `/opt/pihole-manager/config.yaml` (on the Pi)
+**Configuration Location**: `~/pihole-network-manager/config.yaml` (on the Pi)
 
 ### UI (`core/ui.py`)
 
@@ -744,7 +744,7 @@ if not state.is_setup_complete():
 state.mark_setup_complete()
 ```
 
-**State File Location**: `/opt/pihole-manager/state.json` (on the Pi)
+**State File Location**: `~/pihole-network-manager/state.json` (on the Pi)
 
 **State Structure**:
 ```json
@@ -1036,7 +1036,7 @@ if __name__ == '__main__':
 **On-Pi Testing**:
 1. SSH to Pi: `ssh pi@pihole.local`
 2. Activate venv: `source ~/.pihole-manager-venv/bin/activate`
-3. Run application: `python3 /opt/pihole-network-manager/main.py`
+3. Run application: `python3 ~/pihole-network-manager/main.py`
 4. Test all management features
 5. Verify no errors in logs: `tail -f /tmp/pihole-manager-*.log`
 
@@ -1104,7 +1104,7 @@ def restart_pihole() -> bool:
 
     except PermissionError:
         show_error("Permission denied - check sudoers configuration")
-        show_warning("Run: sudo /opt/pihole-network-manager/pi-setup/initial-setup.sh")
+        show_warning("Run: sudo ~/pihole-network-manager/pi-setup/initial-setup.sh")
         return False
 
     except Exception as e:
@@ -1128,7 +1128,7 @@ def restart_bad() -> bool:
 
 ### Configuration File Location
 
-**Standard Path**: `/opt/pihole-manager/config.yaml` (on the Pi)
+**Standard Path**: `~/pihole-network-manager/config.yaml` (on the Pi)
 
 ### Configuration Validation
 
@@ -1143,7 +1143,7 @@ def load_and_validate_config() -> Optional[Config]:
 
     if not config.is_configured():
         show_error("Configuration not found")
-        show_error("Run: sudo /opt/pihole-network-manager/pi-setup/initial-setup.sh")
+        show_error("Run: sudo ~/pihole-network-manager/pi-setup/initial-setup.sh")
         return None
 
     # Validate web_url
@@ -1296,7 +1296,7 @@ query = f"INSERT INTO domainlist VALUES (1, '{domain}', 1)"
 4. ✅ **Rich TUI** - Consistent UI with Rich library (never use `print()`)
 5. ✅ **Type Hints** - All function signatures typed
 6. ✅ **Error Handling** - Specific exceptions, helpful messages
-7. ✅ **Configuration** - YAML-driven at `/opt/pihole-manager/config.yaml`
+7. ✅ **Configuration** - YAML-driven at `~/pihole-network-manager/config.yaml`
 8. ✅ **Testing** - Unit tests (mocked subprocess) + Integration tests (on-Pi)
 9. ✅ **Documentation** - Google-style docstrings
 10. ✅ **Best Practices** - Explicit sudo, appropriate timeouts, SQL escaping, gravity rebuild

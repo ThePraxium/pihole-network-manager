@@ -7,7 +7,7 @@ python::module::main:main.py|components:management,core|entry:true|venv:auto-cre
 python::module::core-config:core/config.py|features:yaml|imports:pyyaml
 python::module::core-local-executor:core/local_executor.py|features:subprocess,file-ops,db-query|sudo:passwordless|location:pi
 python::module::core-ui:core/ui.py|features:menu,table,status,panel|imports:rich|console:global
-python::module::core-state:core/state.py|features:setup-complete-flag|file:/opt/pihole-manager/state.json|simplified:true
+python::module::core-state:core/state.py|features:setup-complete-flag|file:~/pihole-network-manager/state.json|simplified:true
 python::module::core-logger:core/logger.py|features:session-logging,lifecycle-tracking|pattern:singleton|format:YYYYMMDD-HHMMSS.log|location:/tmp/
 
 # Management Modules (all run locally on Pi)
@@ -45,6 +45,6 @@ pi::service::lighttpd:lighttpd|desc:web-interface|status:active|port:80|systemd:
 pi::service::ssh:ssh|desc:ssh-server|status:active|port:22|systemd:true
 
 # Local Execution Configuration
-config::file::pi-config:/opt/pihole-manager/config.yaml|keys:web_url|location:pi
-config::file::state:/opt/pihole-manager/state.json|keys:setup_complete|location:pi|simple:true
+config::file::pi-config:~/pihole-network-manager/config.yaml|keys:web_url|location:pi
+config::file::state:~/pihole-network-manager/state.json|keys:setup_complete|location:pi|simple:true
 config::file::sudoers:/etc/sudoers.d/pihole-manager|purpose:passwordless-sudo|grants:pihole-commands|validated:visudo

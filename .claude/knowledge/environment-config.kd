@@ -7,17 +7,17 @@ env::dev::config:local-development|location:local-computer|python:3.11+|venv:~/.
 env::dev::autonomy:full-autonomy|approval:none|git:feature-branches|testing:unit-tests|deployment:local-only
 
 # Test Pi Environment
-env::test-pi::config:test-raspberry-pi|host:test-pi.local|location:/opt/pihole-network-manager|pihole:installed|exec:local
+env::test-pi::config:test-raspberry-pi|host:test-pi.local|location:~/pihole-network-manager|pihole:installed|exec:local
 env::test-pi::autonomy:autonomous-after-local-tests|approval:auto-after-local-pass|git:release-branches|testing:integration-uat|deployment:git-clone
 env::test-pi::network:isolated-test-network|dns:test-pi-dns|dhcp:optional|production-impact:none
-env::test-pi::setup:initial-setup.sh|sudoers:/etc/sudoers.d/pihole-manager|venv:~/.pihole-manager-venv|state:/opt/pihole-manager/state.json
+env::test-pi::setup:initial-setup.sh|sudoers:/etc/sudoers.d/pihole-manager|venv:~/.pihole-manager-venv|state:~/pihole-network-manager/state.json
 
 # Production Pi Environment
-env::prod-pi::config:production-raspberry-pi|host:pihole.local|location:/opt/pihole-network-manager|pihole:production|exec:local
+env::prod-pi::config:production-raspberry-pi|host:pihole.local|location:~/pihole-network-manager|pihole:production|exec:local
 env::prod-pi::autonomy:approval-required|approval:user-mandatory|git:main-branch|testing:smoke-tests|deployment:git-clone-with-confirm
 env::prod-pi::network:production-network|dns:network-critical|dhcp:serving-all-devices|production-impact:entire-network
 env::prod-pi::safety:backup-before-deploy|rollback:git-checkout|health-checks:mandatory|monitoring:post-deploy
-env::prod-pi::setup:initial-setup.sh|sudoers:/etc/sudoers.d/pihole-manager|venv:~/.pihole-manager-venv|state:/opt/pihole-manager/state.json
+env::prod-pi::setup:initial-setup.sh|sudoers:/etc/sudoers.d/pihole-manager|venv:~/.pihole-manager-venv|state:~/pihole-network-manager/state.json
 
 # Agent Autonomy by Environment
 autonomy::dev::all-agents:full|create:yes|delete:yes|deploy:yes|approval:none

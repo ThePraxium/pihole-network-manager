@@ -50,7 +50,7 @@ flowchart TD
     Check1 -->|No| RunSetup[Run initial-setup.sh]
     Check1 -->|Yes| Check2{Sudo prompts for password?}
 
-    RunSetup --> SetupCmd["sudo /opt/pihole-network-manager/pi-setup/initial-setup.sh"]
+    RunSetup --> SetupCmd["sudo ~/pihole-network-manager/pi-setup/initial-setup.sh"]
     SetupCmd --> Verify[Verify setup complete]
 
     Check2 -->|Yes| GroupCheck{User in pihole-manager group?}
@@ -67,7 +67,7 @@ flowchart TD
     SudoersCheck -->|No| RunSetupAgain[Re-run initial-setup.sh]
     SudoersCheck -->|Yes| FilePerms[Check file permissions]
 
-    FilePerms --> FixPerms["sudo chown -R $USER:$USER /opt/pihole-network-manager"]
+    FilePerms --> FixPerms["sudo chown -R $USER:$USER ~/pihole-network-manager"]
 
     style SetupStart fill:#fdd
     style RunSetup fill:#e1ffe1
@@ -105,18 +105,18 @@ exit
 # SSH back in or restart session
 
 # If still failing, re-run setup
-sudo /opt/pihole-network-manager/pi-setup/initial-setup.sh
+sudo ~/pihole-network-manager/pi-setup/initial-setup.sh
 ```
 
 #### Issue: Setup Not Complete
 
 ```bash
 # Check setup status
-cat /opt/pihole-manager/state.json
+cat ~/pihole-network-manager/state.json
 # Should show: {"setup_complete": true}
 
 # If not complete or file missing, run setup
-sudo /opt/pihole-network-manager/pi-setup/initial-setup.sh
+sudo ~/pihole-network-manager/pi-setup/initial-setup.sh
 
 # Follow prompts - setup will:
 # 1. Create virtual environment
@@ -365,7 +365,7 @@ flowchart TD
     TransferFail --> SpaceCheck{Disk space available?}
     SpaceCheck -->|No| FreeDisk["SSH into Pi<br/>sudo du -sh /*<br/>Clean up space"]
     SpaceCheck -->|Yes| PermCheck{Permissions OK?}
-    PermCheck -->|No| FixPerms["sudo chown -R pi:pi /opt/pihole-manager"]
+    PermCheck -->|No| FixPerms["sudo chown -R pi:pi ~/pihole-network-manager"]
     PermCheck -->|Yes| Retry1[Retry transfer]
 
     InstallFail --> NetCheck{Internet working?}
@@ -415,13 +415,13 @@ sudo git clone https://github.com/yourusername/pihole-network-manager.git
 
 ```bash
 # On the Pi, check ownership
-ls -ld /opt/pihole-network-manager
+ls -ld ~/pihole-network-manager
 
 # Fix ownership
-sudo chown -R $USER:$USER /opt/pihole-network-manager
+sudo chown -R $USER:$USER ~/pihole-network-manager
 
 # Verify
-ls -ld /opt/pihole-network-manager
+ls -ld ~/pihole-network-manager
 # Should show your user as owner
 ```
 
@@ -439,7 +439,7 @@ python3 --version
 # Should be 3.11 or higher
 
 # Re-run setup
-sudo /opt/pihole-network-manager/pi-setup/initial-setup.sh
+sudo ~/pihole-network-manager/pi-setup/initial-setup.sh
 
 # Monitor logs if needed
 tail -f /tmp/pihole-manager-*.log
@@ -557,7 +557,7 @@ Every session is logged with:
 [2025-11-18 10:15:24.123] [INFO] Checking setup state...
 [2025-11-18 10:15:24.234] [STATE:CHECK] files_transferred = True
 [2025-11-18 10:15:24.345] [INFO] Files already transferred (skipping)
-[2025-11-18 10:15:25.456] [SSH] SUCCESS: cd /opt/pihole-manager && bash initial-setup.sh
+[2025-11-18 10:15:25.456] [SSH] SUCCESS: cd ~/pihole-network-manager && bash initial-setup.sh
 [2025-11-18 10:15:25.567] [SSH:STDERR]   bash: initial-setup.sh: No such file or directory
 [2025-11-18 10:15:25.678] [ERROR] Bootstrap failed
 [2025-11-18 10:15:26.789] [MENU] Offering automatic retry to user
@@ -599,7 +599,7 @@ flowchart TD
     Verify2 -->|File exists| Fixed2([FIXED])
     Verify2 -->|Still missing| Perm2[Check disk space]
 
-    PermIssue --> FixPerm["ssh pi@pihole.local<br/>sudo chown -R pi:pi /opt/pihole-manager"]
+    PermIssue --> FixPerm["ssh pi@pihole.local<br/>sudo chown -R pi:pi ~/pihole-network-manager"]
 
     OtherIssue --> Logs[Check session logs]
     Logs --> Support[Share logs for support]
@@ -616,13 +616,13 @@ After recovery, verify files are present:
 
 ```bash
 # Check if initial-setup.sh exists
-ssh pi@pihole.local "ls -la /opt/pihole-manager/initial-setup.sh"
+ssh pi@pihole.local "ls -la ~/pihole-network-manager/initial-setup.sh"
 
 # Should show:
 # -rwxr-xr-x 1 pi pi 1234 Nov 18 10:15 initial-setup.sh
 
 # Verify all setup files
-ssh pi@pihole.local "ls -la /opt/pihole-manager/"
+ssh pi@pihole.local "ls -la ~/pihole-network-manager/"
 
 # Should show:
 # initial-setup.sh
@@ -689,7 +689,7 @@ ping 192.168.1.1  # Use your router IP
 
 # OR for automation mode, re-encrypt
 ssh pi@pihole.local "
-    cd /opt/pihole-manager &&
+    cd ~/pihole-network-manager &&
     python3 -c 'from management.router_control import encrypt_password; encrypt_password(\"YOUR_PASSWORD\")'
 "
 ```
@@ -748,15 +748,15 @@ flowchart TD
 crontab -e
 
 # Add entries (example: block social media 9 AM - 5 PM weekdays)
-0 9 * * 1-5 /opt/pihole-manager/enable_rule.sh social_media
-0 17 * * 1-5 /opt/pihole-manager/disable_rule.sh social_media
+0 9 * * 1-5 ~/pihole-network-manager/enable_rule.sh social_media
+0 17 * * 1-5 ~/pihole-network-manager/disable_rule.sh social_media
 ```
 
 #### Issue: Rules Created But Not Blocking
 
 ```bash
 # Check if rule is enabled
-cat /opt/pihole-manager/content_filter_rules.json | jq '.[] | select(.name=="RULE_NAME") | .enabled'
+cat ~/pihole-network-manager/content_filter_rules.json | jq '.[] | select(.name=="RULE_NAME") | .enabled'
 
 # Rebuild gravity (CRITICAL STEP)
 ssh pi@pihole.local "sudo pihole -g"

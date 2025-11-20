@@ -44,19 +44,18 @@ Pi-hole Network Manager runs **directly on your Raspberry Pi** - no remote SSH c
 # SSH into your Pi
 ssh username@pihole.local  # or use IP address
 
-# Clone the repository
-cd /opt
-sudo git clone https://github.com/YOUR_REPO/pihole-network-manager.git
-sudo chown -R $USER:$USER /opt/pihole-network-manager
+# Clone the repository to your home directory
+cd ~
+git clone https://github.com/YOUR_REPO/pihole-network-manager.git
 
 # Run initial setup
-cd /opt/pihole-network-manager
+cd ~/pihole-network-manager
 sudo ./pi-setup/initial-setup.sh
 ```
 
 **Step 3: Run the Manager**
 ```bash
-cd /opt/pihole-network-manager
+cd ~/pihole-network-manager
 python3 main.py
 ```
 
@@ -217,7 +216,7 @@ pihole-network-manager/
 After initial setup is complete, SSH into your Pi and run:
 
 ```bash
-cd /opt/pihole-network-manager
+cd ~/pihole-network-manager
 python3 main.py
 ```
 
@@ -248,8 +247,8 @@ Navigate using number keys and enjoy network-wide ad blocking!
 
 ## Configuration Files
 
-- **Pi Configuration**: `/opt/pihole-manager/config.yaml`
-- **State File**: `/opt/pihole-manager/state.json`
+- **Pi Configuration**: `~/pihole-network-manager/config.yaml`
+- **State File**: `~/pihole-network-manager/state.json`
 - **Sudoers**: `/etc/sudoers.d/pihole-manager`
 - **Session Logs**: `/tmp/pihole-manager-<date>.log`
 

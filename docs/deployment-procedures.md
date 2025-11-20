@@ -243,7 +243,7 @@ python3 main.py
 # Select: Pi-hole Management → Configuration → Deploy to Test Pi
 
 # Or direct SSH
-scp -r core management setup pi@test-pi.local:/opt/pihole-manager/
+scp -r core management setup pi@test-pi.local:~/pihole-network-manager/
 ssh pi@test-pi.local "sudo systemctl restart pihole-manager"  # If service exists
 ```
 
@@ -565,7 +565,7 @@ Symptom: SFTP upload fails
 Cause: Permissions, disk space
 Fix:
   1. Check disk space: ssh pi@pihole.local "df -h"
-  2. Check permissions: ssh pi@pihole.local "ls -la /opt/pihole-manager"
+  2. Check permissions: ssh pi@pihole.local "ls -la ~/pihole-network-manager"
   3. Verify SSH user has write access
 ```
 

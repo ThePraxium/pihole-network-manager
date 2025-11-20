@@ -17,27 +17,44 @@
 
 ## Critical Issues (P0)
 
-### ✅ FIXED: Issue #1 - Pi-hole Installation Corruption
-**Status**: ✅ Resolved during pre-testing
-**Severity**: 🔴 P0 - Critical
-**Category**: Setup / Installation
+### 🔴 CRITICAL: Issue #1 - Pi-hole Installation Does NOT Survive Reboots
+**Status**: ⚠️ RECURRING - Requires immediate permanent fix
+**Severity**: 🔴 P0 - CRITICAL BLOCKER
+**Category**: Setup / Installation - RECURRING FAILURE
 **Module**: pi-setup/
 
 **Problem**:
 - `/opt/pihole/` directory completely missing after setup wizard
-- pihole-FTL service failed to start (status 203/EXEC)
+- **RECURRING**: Directory disappears AGAIN after system reboot
+- pihole-FTL service fails to start (status 203/EXEC)
 - All pihole commands non-functional
-- Setup wizard reported success but installation was incomplete
+- Setup wizard reports success but installation is incomplete/unstable
 
-**Root Cause**:
-- Pi-hole installation script failure or incomplete execution
-- Setup wizard marked pihole_install as complete without verification
-- No health check to verify /opt/pihole/ directory exists
+**Occurrences**:
+1. **Pre-UAT (16:20)**: Fixed by Pi-hole reinstall
+2. **Post-UAT (17:15)**: System rebooted, `/opt/pihole/` lost again
+3. **Manual Recovery (17:19)**: Fixed by manually recreating directory structure
 
-**Resolution Applied**:
-- Manually reinstalled Pi-hole using official installer
-- Verified service operational
-- All checks passing
+**Root Causes Identified**:
+1. Pi-hole installation incomplete - FTL download failed during initial setup
+2. `/opt/pihole/` directory not persistent across reboots
+3. System reboot at 17:15 caused complete loss of `/opt/pihole/`
+4. Setup wizard marks pihole_install as complete without verification
+5. No health check to verify `/opt/pihole/` directory exists and persists
+
+**Resolution Applied (Temporary)**:
+1. Manually recreated `/opt/pihole/` directory structure
+2. Created symlinks to `/etc/.pihole/advanced/Scripts/`
+3. Created minimal pre/post start scripts
+4. FTL service now running and DNS operational
+5. **BUT**: Fix is NOT permanent - will not survive next reboot
+
+**Critical Impact**:
+- **BLOCKS PRODUCTION**: System cannot be deployed - will fail on every reboot
+- Complete Pi-hole failure after any reboot/power cycle
+- User data (blocklists, settings) lost
+- DNS resolution fails completely
+- No warning or error - silent failure
 
 **Permanent Fix Required**:
 1. **Add installation verification to setup wizard**:
@@ -59,17 +76,40 @@
    - Runs: `curl -sSL https://install.pi-hole.net | sudo bash`
    - Useful for recovery from this type of failure
 
-**Estimated Effort**: 4-6 hours
+**Emergency Recovery Procedure** (Until Permanent Fix):
+```bash
+# If Pi-hole fails after reboot:
+ssh pihole@<pi-ip>
+sudo mkdir -p /opt/pihole
+sudo ln -sf /etc/.pihole/advanced/Scripts/COL_TABLE /opt/pihole/
+sudo ln -sf /etc/.pihole/advanced/Scripts/utils.sh /opt/pihole/
+sudo ln -sf /etc/.pihole/advanced/Scripts/api.sh /opt/pihole/
+sudo bash -c 'cat > /opt/pihole/pihole-FTL-prestart.sh << EOF
+#!/bin/bash
+exit 0
+EOF'
+sudo bash -c 'cat > /opt/pihole/pihole-FTL-poststop.sh << EOF
+#!/bin/bash
+exit 0
+EOF'
+sudo chmod +x /opt/pihole/pihole-FTL-*.sh
+sudo systemctl restart pihole-FTL
+```
+
+**Estimated Effort**: 6-8 hours (URGENT)
+- Root cause investigation: 2 hours
+- Permanent /opt/pihole/ persistence solution: 2 hours
 - Verification logic: 2 hours
 - Startup checks: 1 hour
 - Repair option: 1 hour
-- Testing: 2 hours
+- Comprehensive testing with reboots: 2 hours
 
 **Files to Modify**:
-- `pi-setup/setup.py` (pihole_install module)
+- `pi-setup/setup.py` (pihole_install module - add verification)
+- `pi-setup/initial-setup.sh` (ensure proper Pi-hole installation)
 - `main.py` (add health check before menu)
 - `management/maintenance.py` (add repair option)
-- `docs/troubleshooting-guide.md` (document fix)
+- `docs/troubleshooting-guide.md` (document recovery procedure)
 
 ---
 
@@ -82,7 +122,7 @@
 **Module**: core/logger.py, pi-setup/
 
 **Problem**:
-- Logger fails to write to `/opt/pihole-network-manager/logs/` directory
+- Logger fails to write to `~/pihole-network-manager/logs/` directory
 - Error: `[Errno 13] Permission denied`
 - Directory owned by root:root, application runs as pihole user
 - Session logging disabled, no audit trail
@@ -100,13 +140,13 @@
    - File: `pi-setup/initial-setup.sh`
    - After creating directories, add:
      ```bash
-     chown -R $USER:$USER /opt/pihole-network-manager/logs
-     chmod 755 /opt/pihole-network-manager/logs
+     chown -R $USER:$USER ~/pihole-network-manager/logs
+     chmod 755 ~/pihole-network-manager/logs
      ```
 
 2. **Add fallback logging**:
    - File: `core/logger.py`
-   - If `/opt/pihole-network-manager/logs/` fails, try `/tmp/pihole-manager-*.log`
+   - If `~/pihole-network-manager/logs/` fails, try `/tmp/pihole-manager-*.log`
    - Show warning but don't prevent app from starting
 
 3. **Add permission check on startup**:
@@ -115,7 +155,7 @@
    - If not, show friendly warning:
      ```
      Warning: Cannot write to logs/ directory
-     Run: sudo chown -R $USER:$USER /opt/pihole-network-manager/logs
+     Run: sudo chown -R $USER:$USER ~/pihole-network-manager/logs
      Logging to /tmp/ instead
      ```
 
@@ -196,19 +236,19 @@
 **Problem**:
 - Profile YAML files (light.yaml, moderate.yaml, aggressive.yaml) exist in local repository
 - Files were not copied to Pi-hole during deployment
-- `/opt/pihole-network-manager/profiles/` directory exists but is empty
+- `~/pihole-network-manager/profiles/` directory exists but is empty
 - Profile switching functionality (operations 1.2-1.4) fails
 - Error: `Profile 'light' not found on Pi-hole`
 
 **Root Cause**:
 - Deployment process doesn't copy `pi-setup/profiles/` to production location
-- Files should be in `/opt/pihole-network-manager/profiles/` but only exist locally
+- Files should be in `~/pihole-network-manager/profiles/` but only exist locally
 - No deployment step to transfer profile files
 
 **Resolution Applied**:
 - Manually copied profile files: `scp ./pi-setup/profiles/*.yaml pihole@192.168.0.12:/tmp/`
-- Moved to correct location: `sudo mv /tmp/*.yaml /opt/pihole-network-manager/profiles/`
-- Set correct permissions: `sudo chown pihole:pihole /opt/pihole-network-manager/profiles/*.yaml`
+- Moved to correct location: `sudo mv /tmp/*.yaml ~/pihole-network-manager/profiles/`
+- Set correct permissions: `sudo chown pihole:pihole ~/pihole-network-manager/profiles/*.yaml`
 - Verified all 3 profiles readable and functional
 
 **Permanent Fix Required**:
@@ -216,17 +256,17 @@
    - File: `docs/deployment-guide.md`
    - Add step to copy profile files during deployment:
      ```bash
-     sudo cp -r pi-setup/profiles /opt/pihole-network-manager/
-     sudo chown -R pihole:pihole /opt/pihole-network-manager/profiles
+     sudo cp -r pi-setup/profiles ~/pihole-network-manager/
+     sudo chown -R pihole:pihole ~/pihole-network-manager/profiles
      ```
 
 2. **Update initial-setup.sh**:
    - File: `pi-setup/initial-setup.sh`
    - Add profile file copy step:
      ```bash
-     mkdir -p /opt/pihole-network-manager/profiles
-     cp pi-setup/profiles/*.yaml /opt/pihole-network-manager/profiles/
-     chown -R $USER:$USER /opt/pihole-network-manager/profiles
+     mkdir -p ~/pihole-network-manager/profiles
+     cp pi-setup/profiles/*.yaml ~/pihole-network-manager/profiles/
+     chown -R $USER:$USER ~/pihole-network-manager/profiles
      ```
 
 3. **Add profile file check to health module**:
@@ -335,18 +375,30 @@
 
 ## Summary
 
-| Category | Total | Fixed | Open | In Progress |
-|----------|-------|-------|------|-------------|
-| Critical (P0) | 1 | 1 | 0 | 0 |
+| Category | Total | Fixed | Open | Recurring |
+|----------|-------|-------|------|-----------|
+| Critical (P0) | 1 | 0 | 0 | **1** 🔴 |
 | High (P1) | 2 | 1 | 0 | 1 |
 | Medium (P2) | 2 | 2 | 0 | 0 |
 | Low (P3) | 2 | 0 | 2 | 0 |
-| **Total** | **7** | **4** | **2** | **1** |
+| **Total** | **7** | **3** | **2** | **2** |
 
-**UAT Session Update (2025-11-20)**:
-- ✅ Fixed Issue #3 (sqlite3) and Issue #5 (profiles) during comprehensive testing
+**UAT Session Updates (2025-11-20)**:
+
+**Comprehensive Testing (17:00-17:10)**:
+- ✅ Fixed Issue #3 (sqlite3) and Issue #5 (profiles) during testing
 - ✅ All 7 modules tested and verified functional
 - ✅ 100% core functionality passing
+
+**Critical Post-Testing Discovery (17:15-17:20)**:
+- 🔴 **CRITICAL**: Issue #1 is RECURRING - Pi-hole does NOT survive reboots
+- ⚠️ System rebooted at 17:15, `/opt/pihole/` disappeared again
+- ⚠️ Required emergency manual recovery to restore service
+- 🚫 **BLOCKS PRODUCTION DEPLOYMENT** until permanent fix applied
+
+**Status Change**: Issue #1 escalated from "Fixed" to "Recurring Critical Blocker"
+
+**Remaining Issues**:
 - ⚠️ Issue #4 (query_database) remains suspected but not confirmed
 - 🟢 Enhancements (P3) deferred to post-production
 
@@ -393,7 +445,7 @@
 
 **Testing Instructions**:
 1. SSH into Pi-hole: `ssh -i ~/.ssh/pihole_rsa pihole@192.168.0.12`
-2. Navigate to app: `cd /opt/pihole-network-manager`
+2. Navigate to app: `cd ~/pihole-network-manager`
 3. Launch app: `python3 main.py`
 4. Follow: `docs/uat-testing-guide.md`
 5. Document results using template

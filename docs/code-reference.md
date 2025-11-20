@@ -98,13 +98,13 @@ graph TD
 
 ```mermaid
 flowchart TD
-    Start([Clone to /opt/pihole-network-manager]) --> Setup[sudo ./pi-setup/initial-setup.sh]
+    Start([Clone to ~/pihole-network-manager]) --> Setup[sudo ./pi-setup/initial-setup.sh]
 
     Setup --> S1[Update system packages]
     S1 --> S2[Install Python 3.11+, SQLite, Git]
     S2 --> S3[Create pihole-manager group]
     S3 --> S4[Install sudoers configuration]
-    S4 --> S5[Create /opt/pihole-manager directory]
+    S4 --> S5[Create configuration directories]
     S5 --> S6[Set up Python virtual environment]
     S6 --> S7[Mark setup as complete]
 
@@ -249,7 +249,7 @@ logger.stop()
 ### State Tracking System
 
 **File**: `core/state.py`
-**Storage**: `/opt/pihole-manager/state.json`
+**Storage**: `~/pihole-network-manager/state.json`
 **Purpose**: Track setup completion
 
 ### Setup State
@@ -397,7 +397,7 @@ blocklists:
 
 ```mermaid
 flowchart TD
-    Rules[Content Filter Rules<br/>/opt/pihole-manager/<br/>content_filter_rules.json] --> Load[Load Rules]
+    Rules[Content Filter Rules<br/>~/pihole-network-manager/<br/>content_filter_rules.json] --> Load[Load Rules]
 
     Load --> Check{Rule Enabled?}
     Check -->|No| Skip[Skip Rule]
@@ -450,8 +450,8 @@ flowchart TD
 ```mermaid
 graph TB
     subgraph Configuration
-        PiConfig[/opt/pihole-manager/<br/>config.yaml]
-        StateFile[/opt/pihole-manager/<br/>state.json]
+        PiConfig[~/pihole-network-manager/<br/>config.yaml]
+        StateFile[~/pihole-network-manager/<br/>state.json]
         Sudoers[/etc/sudoers.d/<br/>pihole-manager]
     end
 
@@ -653,8 +653,8 @@ results = query_database("/etc/pihole/gravity.db", "SELECT * FROM domainlist")
 | FTL Database | `/etc/pihole/pihole-FTL.db` | Read: Yes |
 | Pi-hole Config | `/etc/pihole/setupVars.conf` | Yes |
 | Blocklist Profiles | `pi-setup/profiles/*.yaml` | No (read-only) |
-| State File | `/opt/pihole-manager/state.json` | Yes |
-| Pi Config | `/opt/pihole-manager/config.yaml` | Yes |
+| State File | `~/pihole-network-manager/state.json` | No |
+| Pi Config | `~/pihole-network-manager/config.yaml` | No |
 | Sudoers Config | `/etc/sudoers.d/pihole-manager` | Yes (read-only) |
 | Session Logs | `/tmp/pihole-manager-*.log` | No |
 | Virtual Env | `~/.pihole-manager-venv/` | No |

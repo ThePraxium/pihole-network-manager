@@ -33,7 +33,7 @@ sudo usermod -aG pihole-manager $USER
 exit
 
 # If still failing, re-run setup
-sudo /opt/pihole-network-manager/pi-setup/initial-setup.sh
+sudo ~/pihole-network-manager/pi-setup/initial-setup.sh
 ```
 
 **Severity**: High
@@ -74,10 +74,10 @@ sudo cat /etc/sudoers.d/pihole-manager
 **Fix**:
 ```bash
 # On the Pi, run setup
-sudo /opt/pihole-network-manager/pi-setup/initial-setup.sh
+sudo ~/pihole-network-manager/pi-setup/initial-setup.sh
 
 # Verify setup complete
-cat /opt/pihole-manager/state.json
+cat ~/pihole-network-manager/state.json
 # Should show: {"setup_complete": true}
 ```
 
@@ -232,16 +232,16 @@ sudo apt install python3-venv
 
 **Symptom**: Config file not found error
 
-**Cause**: Config file doesn't exist at `/opt/pihole-manager/config.yaml`
+**Cause**: Config file doesn't exist at `~/pihole-network-manager/config.yaml`
 
 **Fix**:
 ```bash
 # On the Pi, create config from template
-sudo cp /opt/pihole-network-manager/config.yaml.template /opt/pihole-manager/config.yaml
-sudo chown $USER:$USER /opt/pihole-manager/config.yaml
+sudo cp ~/pihole-network-manager/config.yaml.template ~/pihole-network-manager/config.yaml
+sudo chown $USER:$USER ~/pihole-network-manager/config.yaml
 
 # Edit with your router details (if using router integration)
-nano /opt/pihole-manager/config.yaml
+nano ~/pihole-network-manager/config.yaml
 ```
 
 **Severity**: High
@@ -272,7 +272,7 @@ nano /opt/pihole-manager/config.yaml
 
 **Fix**:
 1. Check disk space: `df -h`
-2. Check permissions: `sudo chown -R $USER:$USER /opt/pihole-network-manager`
+2. Check permissions: `sudo chown -R $USER:$USER ~/pihole-network-manager`
 3. Verify internet connectivity: `ping -c 3 github.com`
 4. Re-run clone: `cd /opt && sudo git clone https://github.com/yourusername/pihole-network-manager.git`
 
@@ -413,7 +413,7 @@ ssh pi@pihole.local "sudo pihole -g"
 
 **Fix**:
 1. Check SSH connection
-2. Verify backup file exists on Pi: `ssh pi@pihole.local "ls -lh /opt/pihole-manager/backups/"`
+2. Verify backup file exists on Pi: `ssh pi@pihole.local "ls -lh ~/pihole-network-manager/backups/"`
 3. Check local disk space
 
 **Severity**: Medium

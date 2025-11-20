@@ -82,17 +82,14 @@ ssh username@pihole.local
 ### Step 3: Clone Repository
 
 ```bash
-# Navigate to /opt directory
-cd /opt
+# Navigate to home directory
+cd ~
 
 # Clone the repository (replace with actual repository URL)
-sudo git clone https://github.com/YOUR_USERNAME/pihole-network-manager.git
-
-# Set ownership to current user
-sudo chown -R $USER:$USER /opt/pihole-network-manager
+git clone https://github.com/YOUR_USERNAME/pihole-network-manager.git
 
 # Navigate to project directory
-cd /opt/pihole-network-manager
+cd ~/pihole-network-manager
 ```
 
 ### Step 4: Run Initial Setup
@@ -133,7 +130,7 @@ Step 4/7: Installing sudoers configuration...
 ✓ Syntax validated
 
 Step 5/7: Creating configuration directory...
-✓ Directory created: /opt/pihole-manager
+✓ Directory created: ~/pihole-network-manager
 
 Step 6/7: Setting up Python virtual environment...
 ✓ Virtual environment created
@@ -146,7 +143,7 @@ Step 7/7: Marking setup as complete...
 === Setup Complete! ===
 
 You can now run the manager:
-  cd /opt/pihole-network-manager
+  cd ~/pihole-network-manager
   python3 main.py
 ```
 
@@ -159,7 +156,7 @@ You can now run the manager:
 ### Step 5: Run the Manager
 
 ```bash
-cd /opt/pihole-network-manager
+cd ~/pihole-network-manager
 python3 main.py
 ```
 
@@ -177,7 +174,7 @@ The web URL is used for quick browser access from the management tool:
 1. Run the manager: `python3 main.py`
 2. Select "Configuration" from main menu
 3. Select "Edit Settings"
-4. Edit `/opt/pihole-manager/config.yaml`
+4. Edit `~/pihole-network-manager/config.yaml`
 5. Set `web_url` to your Pi-hole admin URL (e.g., `http://192.168.1.100/admin`)
 
 ### Configure Router Integration (Optional)
@@ -190,7 +187,7 @@ For TP-Link router control features:
    - Router IP address
    - Admin username (usually `admin`)
    - Admin password
-4. Credentials are encrypted and stored in `/opt/pihole-manager/config.yaml`
+4. Credentials are encrypted and stored in `~/pihole-network-manager/config.yaml`
 
 ### Set Static IP for Pi-hole
 
@@ -241,7 +238,7 @@ Point your router's DNS to Pi-hole for network-wide blocking:
 ssh username@pihole.local
 
 # Run the manager
-cd /opt/pihole-network-manager
+cd ~/pihole-network-manager
 python3 main.py
 ```
 
@@ -301,7 +298,7 @@ tail -f /tmp/pihole-manager-$(date +%Y%m%d).log
 python3 --version
 
 # Verify setup completed
-cat /opt/pihole-manager/state.json
+cat ~/pihole-network-manager/state.json
 
 # If state file missing, re-run setup
 sudo ./pi-setup/initial-setup.sh
@@ -415,9 +412,9 @@ df -h
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| Application | `/opt/pihole-network-manager/` | Manager installation |
-| Configuration | `/opt/pihole-manager/config.yaml` | Settings and credentials |
-| State File | `/opt/pihole-manager/state.json` | Setup completion tracking |
+| Application | `~/pihole-network-manager/` | Manager installation |
+| Configuration | `~/pihole-network-manager/config.yaml` | Settings and credentials |
+| State File | `~/pihole-network-manager/state.json` | Setup completion tracking |
 | Sudoers | `/etc/sudoers.d/pihole-manager` | Passwordless sudo rules |
 | Session Logs | `/tmp/pihole-manager-*.log` | Daily session logs |
 | Virtual Env | `~/.pihole-manager-venv/` | Python dependencies |
@@ -430,7 +427,7 @@ df -h
 To update to the latest version:
 
 ```bash
-cd /opt/pihole-network-manager
+cd ~/pihole-network-manager
 
 # Pull latest changes
 git pull
@@ -449,11 +446,8 @@ python3 main.py
 To completely remove Pi-hole Network Manager:
 
 ```bash
-# Remove application
-sudo rm -rf /opt/pihole-network-manager
-
-# Remove configuration
-sudo rm -rf /opt/pihole-manager
+# Remove application (includes configuration and state files)
+rm -rf ~/pihole-network-manager
 
 # Remove virtual environment
 rm -rf ~/.pihole-manager-venv

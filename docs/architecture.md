@@ -30,7 +30,7 @@ The Pi-hole Network Manager is a **local Python application** that runs directly
 │         Raspberry Pi (pihole.local)                │
 │  ┌──────────────────────────────────────────────┐ │
 │  │   Pi-hole Network Manager (Python App)       │ │
-│  │   Location: /opt/pihole-network-manager       │ │
+│  │   Location: ~/pihole-network-manager          │ │
 │  │                                                │ │
 │  │   ┌────────────┐  ┌────────────────────────┐ │ │
 │  │   │  main.py   │  │  Management Modules     │ │ │
@@ -150,7 +150,7 @@ file_exists(file_path)
 #### config.py
 **Purpose**: Configuration management with encryption support
 
-**Configuration Location**: `/opt/pihole-manager/config.yaml`
+**Configuration Location**: `~/pihole-network-manager/config.yaml`
 
 **Structure:**
 ```yaml
@@ -162,7 +162,7 @@ web_url: "http://192.168.1.100/admin"  # Pi-hole web interface
 #### state.py
 **Purpose**: Simple setup completion tracking
 
-**State Location**: `/opt/pihole-manager/state.json`
+**State Location**: `~/pihole-network-manager/state.json`
 
 **Structure:**
 ```json
@@ -312,13 +312,13 @@ graph LR
 
 ```mermaid
 flowchart TD
-    Start([SSH to Pi]) --> Clone[git clone to<br/>/opt/pihole-network-manager]
+    Start([SSH to Pi]) --> Clone[git clone to<br/>~/pihole-network-manager]
     Clone --> Setup[sudo ./pi-setup/initial-setup.sh]
     Setup --> S1[Update system packages]
     S1 --> S2[Install Python 3.11+, SQLite]
     S2 --> S3[Create pihole-manager group]
     S3 --> S4[Install sudoers config]
-    S4 --> S5[Create /opt/pihole-manager dirs]
+    S4 --> S5[Create config directories]
     S5 --> S6[Setup Python venv]
     S6 --> S7[Mark setup complete]
     S7 --> Run[python3 main.py]
@@ -326,8 +326,8 @@ flowchart TD
 
 **Key Files Created**:
 - `/etc/sudoers.d/pihole-manager` - Passwordless sudo rules
-- `/opt/pihole-manager/state.json` - Setup completion flag
-- `/opt/pihole-manager/config.yaml` - Configuration (created on first run)
+- `~/pihole-network-manager/state.json` - Setup completion flag
+- `~/pihole-network-manager/config.yaml` - Configuration (created on first run)
 - `~/.pihole-manager-venv/` - Python virtual environment
 
 ---

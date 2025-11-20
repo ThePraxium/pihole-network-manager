@@ -30,7 +30,7 @@ issue::python::venv-not-activated:dependencies-not-found|cause:venv-not-activate
 
 # Configuration Issues
 issue::config::config-not-found:config.yaml-not-found|cause:initial-setup-not-run|fix:run-initial-setup.sh|severity:high
-issue::config::config-not-saved:configuration-not-persisting|cause:yaml-file-write-error|fix:check-/opt/pihole-manager-perms|severity:medium
+issue::config::config-not-saved:configuration-not-persisting|cause:yaml-file-write-error|fix:check-~/pihole-network-manager-perms|severity:medium
 
 # Content Filter Issues
 issue::content-filter::no-auto-enforcement:time-based-rules-not-automatic|cause:manual-enforcement-required|fix:create-cron-jobs-or-enable-disable-manually|severity:medium|known-limitation:true
@@ -38,8 +38,8 @@ issue::content-filter::rules-not-applying:rules-created-but-not-blocking|cause:g
 
 # Deployment Issues
 issue::deploy::git-clone-fails:git-clone-fails|cause:no-internet-or-wrong-url|fix:check-network-verify-repo-url|severity:high
-issue::deploy::permissions-wrong:permission-denied-after-clone|cause:files-owned-by-root|fix:sudo-chown -R-$USER:$USER-/opt/pihole-network-manager|severity:high
-issue::deploy::config-not-saved:configuration-not-persisting|cause:yaml-file-write-error|fix:check-/opt/pihole-manager-perms|severity:medium
+issue::deploy::permissions-wrong:permission-denied-after-clone|cause:files-owned-by-root|fix:sudo-chown -R-$USER:$USER-~/pihole-network-manager|severity:high
+issue::deploy::config-not-saved:configuration-not-persisting|cause:yaml-file-write-error|fix:check-~/pihole-network-manager-perms|severity:medium
 
 # Network Issues
 issue::network::pi-not-found:cannot-ssh-to-pi|cause:wrong-hostname-or-dhcp-change|fix:check-router-dhcp-leases-or-use-ip|severity:high

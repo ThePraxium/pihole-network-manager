@@ -37,7 +37,7 @@
 
 ### Test 2: Application Directory
 **Status**: ✅ PASS
-**Location**: `/opt/pihole-network-manager`
+**Location**: `~/pihole-network-manager`
 **Result**: Directory exists with all required files
 **Details**:
 - main.py present and executable
@@ -47,7 +47,7 @@
 
 ### Test 3: Setup Completion Status
 **Status**: ✅ PASS
-**File**: `/opt/pihole-network-manager/setup_state.json`
+**File**: `~/pihole-network-manager/setup_state.json`
 **Result**: All setup modules completed successfully
 **Completed Modules**:
 - security_hardening: ✅ 2025-11-20T16:06:52
@@ -133,21 +133,21 @@
 
 **Symptoms**:
 - Application launches but logs fail to write
-- Error message: `Failed to start logger: [Errno 13] Permission denied: '/opt/pihole-network-manager/logs/20251120-164715.log'`
+- Error message: `Failed to start logger: [Errno 13] Permission denied: '~/pihole-network-manager/logs/20251120-164715.log'`
 - Application continues to run despite logging failure
 
 **Root Cause**:
-- `/opt/pihole-network-manager/logs/` directory owned by root:root
+- `~/pihole-network-manager/logs/` directory owned by root:root
 - Application runs as user `pihole` which cannot write to root-owned directory
 - Setup script didn't set correct ownership on logs directory
 
 **Error Output**:
 ```
-Failed to start logger: [Errno 13] Permission denied: '/opt/pihole-network-manager/logs/20251120-164715.log'
+Failed to start logger: [Errno 13] Permission denied: '~/pihole-network-manager/logs/20251120-164715.log'
 ```
 
 **Resolution**:
-1. Changed ownership: `sudo chown -R pihole:pihole /opt/pihole-network-manager/logs`
+1. Changed ownership: `sudo chown -R pihole:pihole ~/pihole-network-manager/logs`
 2. Verified permissions: drwxr-xr-x pihole pihole
 
 **Verification After Fix**:
@@ -278,7 +278,7 @@ Select option [1/2/0] (1):
 
 1. **Manual UAT Execution** (High Priority)
    - SSH into Pi-hole: `ssh -i ~/.ssh/pihole_rsa pihole@192.168.0.12`
-   - Navigate to: `cd /opt/pihole-network-manager`
+   - Navigate to: `cd ~/pihole-network-manager`
    - Run application: `python3 main.py`
    - Follow `docs/uat-testing-guide.md` systematically
    - Document each operation using the template provided
@@ -404,11 +404,11 @@ Select option [1/2/0] (1):
 ## Files Referenced
 
 - **Testing Guide**: `docs/uat-testing-guide.md` (51 operations, complete test matrix)
-- **Setup State**: `/opt/pihole-network-manager/setup_state.json`
+- **Setup State**: `~/pihole-network-manager/setup_state.json`
 - **Pi-hole Config**: `/etc/pihole/setupVars.conf`
 - **Gravity DB**: `/etc/pihole/gravity.db`
 - **FTL DB**: `/etc/pihole/pihole-FTL.db`
-- **Session Logs**: `/opt/pihole-network-manager/logs/`
+- **Session Logs**: `~/pihole-network-manager/logs/`
 
 ---
 
@@ -498,15 +498,15 @@ Select option [1/2/0] (1):
 **Status**: ✅ RESOLVED
 
 **Problem**:
-- Profile YAML files missing from `/opt/pihole-network-manager/profiles/`
+- Profile YAML files missing from `~/pihole-network-manager/profiles/`
 - Directory existed but was empty
 - Profile switching functionality failed
 - Files existed in local repository but not deployed to Pi-hole
 
 **Resolution**:
 1. Copied profile files: `scp ./pi-setup/profiles/*.yaml pihole@192.168.0.12:/tmp/`
-2. Moved to location: `sudo mv /tmp/*.yaml /opt/pihole-network-manager/profiles/`
-3. Fixed permissions: `sudo chown pihole:pihole /opt/pihole-network-manager/profiles/*.yaml`
+2. Moved to location: `sudo mv /tmp/*.yaml ~/pihole-network-manager/profiles/`
+3. Fixed permissions: `sudo chown pihole:pihole ~/pihole-network-manager/profiles/*.yaml`
 4. Verified all 3 profiles (light, moderate, aggressive) functional
 
 **Impact**: Profile switching now works correctly, all profile operations functional
@@ -607,7 +607,7 @@ Select option [1/2/0] (1):
 - ✅ Category support verified
 
 **Key Findings**:
-- Rules file location: `/opt/pihole-network-manager/content_filter_rules.json`
+- Rules file location: `~/pihole-network-manager/content_filter_rules.json`
 - Will be created when user creates first rule
 - Category-based filtering supported
 
