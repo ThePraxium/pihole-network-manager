@@ -62,16 +62,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Local Execution Model**:
 - Application runs **directly on Raspberry Pi** - no remote SSH required
 - All Pi-hole operations execute locally with passwordless sudo
-- Router operations (optional) use SSH from Pi to router
 
 **Communication Pattern**:
 ```
 [Pi-hole Manager on Pi] --subprocess--> [Pi-hole Commands]
-[Pi-hole Manager on Pi] --SSH--> [TP-Link Router] (optional)
 ```
 
 **Key Classes**:
-- `Config` (`core/config.py`) - YAML configuration + encryption
+- `Config` (`core/config.py`) - YAML configuration management
 - `State` (`core/state.py`) - Setup state tracking
 - `execute_command()` (`core/local_executor.py`) - Local subprocess execution
 
@@ -258,7 +256,6 @@ All configuration resides on the Pi where the manager runs.
 ## Platform Constraints
 
 - **Tested**: Raspberry Pi OS Lite (64-bit) only
-- **Router**: TP-Link AXE5400 (other brands not supported)
 - **Init system**: Requires systemd
 - **Network**: Local network only (no VPN/remote access)
 
@@ -315,7 +312,6 @@ This project uses:
 - **Dual-format knowledge base**: `.kd` (AI-optimized) + `.md` (human-readable)
 - **Subprocess execution**: All Pi-hole operations via `core/local_executor.py`
 - **Passwordless sudo**: Specific commands configured in `/etc/sudoers.d/pihole-manager`
-- **Optional router SSH**: Only for TP-Link router integration (Pi → Router)
 - **State persistence**: Simple setup completion tracking
 
 For detailed information, see the appropriate documentation file above.

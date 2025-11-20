@@ -4,7 +4,7 @@
 
 # Core Modules
 python::module::main:main.py|components:management,core|entry:true|venv:auto-create|exec-model:local
-python::module::core-config:core/config.py|features:yaml,encryption|imports:pyyaml,cryptography|router-passwords:encrypted
+python::module::core-config:core/config.py|features:yaml|imports:pyyaml
 python::module::core-local-executor:core/local_executor.py|features:subprocess,file-ops,db-query|sudo:passwordless|location:pi
 python::module::core-ui:core/ui.py|features:menu,table,status,panel|imports:rich|console:global
 python::module::core-state:core/state.py|features:setup-complete-flag|file:/opt/pihole-manager/state.json|simplified:true
@@ -16,7 +16,6 @@ python::module::mgmt-devices:management/devices.py|features:device-view,dns-over
 python::module::mgmt-lists:management/lists.py|features:whitelist,blacklist,regex,gravity|pihole:gravity-db|exec:local
 python::module::mgmt-content-filter:management/content_filter.py|features:time-based-blocking,device-rules|manual-enforcement:true|exec:local
 python::module::mgmt-stats:management/stats.py|features:query-dashboard,top-clients,query-log|pihole:ftl-db|exec:local
-python::module::mgmt-router:management/router_control.py|features:device-list,mac-blocking,dhcp|router:tplink-axe5400|ssh:pi-to-router
 python::module::mgmt-maintenance:management/maintenance.py|features:updates,restart,resources,service-status|sudo:passwordless|exec:local
 python::module::mgmt-health:management/health.py|features:dns-test,service-check,db-integrity|diagnostics:full|exec:local
 
@@ -46,10 +45,6 @@ pi::service::lighttpd:lighttpd|desc:web-interface|status:active|port:80|systemd:
 pi::service::ssh:ssh|desc:ssh-server|status:active|port:22|systemd:true
 
 # Local Execution Configuration
-config::file::pi-config:/opt/pihole-manager/config.yaml|keys:web_url,router|location:pi|encrypted:router-password
+config::file::pi-config:/opt/pihole-manager/config.yaml|keys:web_url|location:pi
 config::file::state:/opt/pihole-manager/state.json|keys:setup_complete|location:pi|simple:true
 config::file::sudoers:/etc/sudoers.d/pihole-manager|purpose:passwordless-sudo|grants:pihole-commands|validated:visudo
-
-# Router Integration (optional - SSH from Pi to router)
-router::model::tplink:AXE5400|api:tplinkrouterc6u|features:device-list,mac-block,reboot|partial:dhcp,bandwidth,guest|ssh:pi-to-router
-router::auth::encrypted:config.yaml|storage:fernet-encrypted|security:medium|optional:true

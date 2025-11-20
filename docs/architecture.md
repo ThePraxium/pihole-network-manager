@@ -63,18 +63,12 @@ The Pi-hole Network Manager is a **local Python application** that runs directly
 │            Network Devices                         │
 │  Computers, Phones, IoT Devices                    │
 └────────────────────────────────────────────────────┘
-
-Optional (Router Integration):
-┌────────────────────────────────────────────────────┐
-│  Raspberry Pi  ────SSH───>  TP-Link Router        │
-│  (local_executor)            (tplinkrouterc6u)     │
-└────────────────────────────────────────────────────┘
 ```
 
 **Key Characteristics:**
 - **Single-component architecture**: Application runs on the same Raspberry Pi as Pi-hole
 - **Local execution**: All Pi-hole commands execute via subprocess with passwordless sudo
-- **No remote SSH**: Pi-hole operations do not require SSH (SSH only for router integration)
+- **No remote SSH**: Pi-hole operations execute locally
 - **Direct database access**: Fast SQLite queries without subprocess overhead
 
 ---
@@ -89,7 +83,7 @@ pihole-network-manager/
 ├── main.py                    # Entry point, menu system, venv management
 │
 ├── core/                      # Core infrastructure
-│   ├── config.py              # YAML config + encryption (router passwords)
+│   ├── config.py              # YAML configuration management
 │   ├── local_executor.py      # Subprocess execution, SQLite queries, file I/O
 │   ├── ui.py                  # Rich TUI components (menu, table, status)
 │   ├── state.py               # Setup completion tracking
@@ -101,7 +95,6 @@ pihole-network-manager/
 │   ├── lists.py               # Whitelist/blacklist management
 │   ├── content_filter.py      # Time-based website blocking
 │   ├── stats.py               # Query analytics and monitoring
-│   ├── router_control.py      # TP-Link router integration (SSH to router)
 │   ├── maintenance.py         # System updates, service control
 │   └── health.py              # Health checks and diagnostics
 │
@@ -162,14 +155,9 @@ file_exists(file_path)
 **Structure:**
 ```yaml
 web_url: "http://192.168.1.100/admin"  # Pi-hole web interface
-
-router:  # Optional - for router integration only
-  host: "192.168.1.1"
-  username: "admin"
-  password: "<encrypted>"  # Fernet encryption
 ```
 
-**Design Decision**: Router passwords are encrypted because they're stored on disk. Pi-hole operations use passwordless sudo instead of credentials.
+**Design Decision**: Pi-hole operations use passwordless sudo configured via sudoers.d file.
 
 #### state.py
 **Purpose**: Simple setup completion tracking
@@ -225,24 +213,6 @@ sequenceDiagram
 - System maintenance commands
 
 **Security**: Only specific commands are granted passwordless sudo. Users must be in the `pihole-manager` group.
-
-### Router Integration (Optional)
-
-Router operations use SSH from Pi to router:
-
-```mermaid
-sequenceDiagram
-    participant Module as router_control.py
-    participant Executor as local_executor.py
-    participant Router as TP-Link Router
-
-    Module->>Executor: Execute router command
-    Executor->>Router: SSH via tplinkrouterc6u library
-    Router-->>Executor: JSON response
-    Executor-->>Module: Parsed data
-```
-
-**Design Decision**: Router SSH is separate from Pi-hole operations. It's an optional feature for users with TP-Link routers.
 
 ---
 
@@ -306,15 +276,7 @@ Pi-hole CLI / SQLite
 
 **No network communication required** for Pi-hole operations.
 
-### External (Router Integration)
-
-```
-router_control.py
-    ↓ SSH (tplinkrouterc6u)
-TP-Link Router API
-```
-
-**Network communication only** for optional router features.
+**No external network communication required** for Pi-hole operations.
 
 ---
 
@@ -398,16 +360,6 @@ flowchart TD
 %pihole-manager ALL=(ALL) NOPASSWD: /usr/bin/apt-get update
 # ... (specific commands only)
 ```
-
-### Router Password Security
-
-**Storage**: `/opt/pihole-manager/config.yaml` (encrypted)
-
-**Encryption**: Fernet (symmetric encryption)
-
-**Key Derivation**: `/etc/machine-id` (unique per Pi)
-
-**Why**: Router passwords must be stored for automated operations. Encryption protects against casual file access.
 
 ### Network Security
 
@@ -536,22 +488,11 @@ if not os.path.exists(venv_path):
     install_dependencies()
 ```
 
-### Why Router Integration vs. Pi-hole Only?
-
-**Decision**: Optional router integration for TP-Link AXE5400
-
-**Rationale**:
-1. **Unified Management**: Single tool for network-wide control
-2. **Advanced Features**: MAC filtering, bandwidth monitoring, guest network
-3. **Convenience**: Complement Pi-hole with router-level controls
-
-**Trade-off**: Tight coupling to specific router model. Future: Abstract router interface for other brands.
-
 ---
 
 ## Conclusion
 
-The Pi-hole Network Manager uses a **local execution architecture** for simplicity, performance, and reliability. The system runs directly on the Raspberry Pi, executing Pi-hole commands via subprocess with passwordless sudo. This design eliminates SSH complexity for Pi-hole operations while maintaining optional SSH support for router integration.
+The Pi-hole Network Manager uses a **local execution architecture** for simplicity, performance, and reliability. The system runs directly on the Raspberry Pi, executing Pi-hole commands via subprocess with passwordless sudo. This design eliminates SSH complexity and provides a streamlined management experience.
 
 **Key Architectural Principles**:
 1. **Local-first**: Operations execute on the same device

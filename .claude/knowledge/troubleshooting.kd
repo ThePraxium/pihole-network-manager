@@ -31,13 +31,6 @@ issue::python::venv-not-activated:dependencies-not-found|cause:venv-not-activate
 # Configuration Issues
 issue::config::config-not-found:config.yaml-not-found|cause:initial-setup-not-run|fix:run-initial-setup.sh|severity:high
 issue::config::config-not-saved:configuration-not-persisting|cause:yaml-file-write-error|fix:check-/opt/pihole-manager-perms|severity:medium
-issue::config::router-password-decrypt-fail:cannot-decrypt-router-password|cause:corruption-or-machine-id-change|fix:re-enter-router-credentials|severity:medium
-
-# Router Issues
-issue::router::connection-timeout:tplink-api-timeout|cause:router-ip-wrong-or-offline|fix:verify-router-ip-password|severity:medium
-issue::router::auth-failed:router-authentication-fails|cause:wrong-password|fix:update-password-in-config|severity:medium
-issue::router::features-incomplete:router-features-not-working|cause:pending-hardware-testing|fix:use-web-interface-workaround|severity:low|known-limitation:true
-issue::router::ssh-from-pi-fails:ssh-from-pi-to-router-fails|cause:router-ssh-disabled-or-firewall|fix:enable-ssh-on-router-or-use-web|severity:medium
 
 # Content Filter Issues
 issue::content-filter::no-auto-enforcement:time-based-rules-not-automatic|cause:manual-enforcement-required|fix:create-cron-jobs-or-enable-disable-manually|severity:medium|known-limitation:true

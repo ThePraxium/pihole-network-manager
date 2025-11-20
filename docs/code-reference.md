@@ -25,7 +25,6 @@ graph TB
         LocalExec[local_executor.py<br/>Subprocess Execution]
         PiHole[Pi-hole<br/>DNS + Ad Blocking]
         PiHoleDBs[(Pi-hole Databases<br/>gravity.db, pihole-FTL.db)]
-        Router[TP-Link Router<br/>AXE5400]
     end
 
     Main --> Core
@@ -34,7 +33,6 @@ graph TB
     Mgmt -->|Uses| LocalExec
     LocalExec -->|subprocess| PiHole
     LocalExec -->|sqlite3| PiHoleDBs
-    Mgmt -->|SSH (optional)| Router
 
     PiHole --> PiHoleDBs
 
@@ -46,7 +44,6 @@ graph TB
 **Key Communication**:
 - All Pi-hole operations use **local subprocess execution** (no SSH)
 - Application runs directly on Raspberry Pi where Pi-hole is installed
-- Router control (optional) uses SSH from Pi to router
 
 ---
 
@@ -67,7 +64,6 @@ graph TD
         MgmtList[management/lists.py]
         MgmtCF[management/content_filter.py]
         MgmtStats[management/stats.py]
-        MgmtRouter[management/router_control.py]
         MgmtMaint[management/maintenance.py]
         MgmtHealth[management/health.py]
     end
@@ -83,7 +79,6 @@ graph TD
     MgmtList --> LocalExec
     MgmtCF --> LocalExec
     MgmtStats --> LocalExec
-    MgmtRouter --> LocalExec
     MgmtMaint --> LocalExec
     MgmtHealth --> LocalExec
 
@@ -450,28 +445,6 @@ flowchart TD
 
 ---
 
-## Router Integration Pattern
-
-```mermaid
-sequenceDiagram
-    participant Mgmt as Management Module<br/>(on Pi)
-    participant Exec as local_executor.py<br/>(on Pi)
-    participant Router as TP-Link Router
-
-    Mgmt->>Exec: Execute router command
-    Exec->>Router: SSH to router<br/>tplinkrouterc6u library
-    Router-->>Exec: JSON Response
-    Exec-->>Mgmt: Parsed result
-    Mgmt->>Mgmt: Display result to user
-```
-
-**Router Authentication**:
-- Password encrypted with Fernet
-- Stored in `/opt/pihole-manager/config.yaml`
-- Optional feature (TP-Link AXE5400 only)
-
----
-
 ## Configuration Files
 
 ```mermaid
@@ -695,16 +668,12 @@ graph TD
     subgraph External Dependencies
         Rich[rich<br/>Terminal UI]
         PyYAML[pyyaml<br/>Config]
-        Crypto[cryptography<br/>Encryption]
-        TPLink[tplinkrouterc6u<br/>Router API]
         Pandas[pandas<br/>Data Analysis]
     end
 
     LocalExec[core/local_executor.py] --> Python[subprocess<br/>sqlite3]
     UI[core/ui.py] --> Rich
     Config[core/config.py] --> PyYAML
-    Config --> Crypto
-    Router[management/router_control.py] --> TPLink
     Stats[management/stats.py] --> Pandas
 
     All[All Management Modules] --> LocalExec
