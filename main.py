@@ -116,10 +116,135 @@ from core.config import Config
 from core.state import State
 from core.ui import console, show_menu, show_success, show_error, show_warning, show_status
 from core.logger import get_logger
+from core.local_executor import execute_command, file_exists
 
 # Import management modules
 from management import blocklists, devices, lists, content_filter, stats
 from management import maintenance, health
+
+
+def check_pihole_directory_health() -> tuple[bool, list[str]]:
+    """
+    Check if Pi-hole directory structure is intact.
+
+    Returns:
+        tuple: (is_healthy, list_of_missing_items)
+    """
+    missing = []
+
+    # Check /opt/pihole/ directory exists
+    if not file_exists("/opt/pihole"):
+        missing.append("/opt/pihole/ directory")
+        return False, missing
+
+    # Check critical symlinks/files
+    critical_files = [
+        "/opt/pihole/COL_TABLE",
+        "/opt/pihole/utils.sh",
+        "/opt/pihole/api.sh",
+        "/opt/pihole/pihole-FTL-prestart.sh",
+        "/opt/pihole/pihole-FTL-poststop.sh"
+    ]
+
+    for filepath in critical_files:
+        if not file_exists(filepath):
+            missing.append(filepath)
+
+    return len(missing) == 0, missing
+
+
+def auto_repair_pihole_directory() -> bool:
+    """
+    Automatically repair /opt/pihole/ directory structure.
+
+    Returns:
+        bool: True if repair successful, False otherwise
+    """
+    console.print("\n[bold yellow]⚠ Pi-hole Directory Repair Required[/bold yellow]\n")
+    console.print("The /opt/pihole/ directory is missing or incomplete.")
+    console.print("This is required for Pi-hole FTL service to function.\n")
+
+    # Ask for confirmation
+    repair = Confirm.ask("Auto-repair Pi-hole directory structure?", default=True)
+
+    if not repair:
+        console.print("\n[yellow]Skipping auto-repair. You can manually repair from Maintenance menu.[/yellow]\n")
+        return False
+
+    console.print("\n[cyan]Starting auto-repair...[/cyan]\n")
+
+    # Step 1: Create /opt/pihole/ directory
+    console.print("  [1/6] Creating /opt/pihole/ directory...")
+    success, _, error = execute_command("mkdir -p /opt/pihole", sudo=True)
+    if not success:
+        console.print(f"  [red]✗ Failed: {error}[/red]\n")
+        return False
+    console.print("  [green]✓ Directory created[/green]")
+
+    # Step 2-4: Create symlinks to Pi-hole scripts
+    symlinks = [
+        ("/etc/.pihole/advanced/Scripts/COL_TABLE", "/opt/pihole/COL_TABLE"),
+        ("/etc/.pihole/advanced/Scripts/utils.sh", "/opt/pihole/utils.sh"),
+        ("/etc/.pihole/advanced/Scripts/api.sh", "/opt/pihole/api.sh")
+    ]
+
+    step = 2
+    for source, dest in symlinks:
+        console.print(f"  [{step}/6] Creating symlink: {dest}...")
+        success, _, error = execute_command(f"ln -sf {source} {dest}", sudo=True)
+        if not success:
+            console.print(f"  [red]✗ Failed: {error}[/red]\n")
+            return False
+        console.print(f"  [green]✓ Symlink created[/green]")
+        step += 1
+
+    # Step 5: Create pihole-FTL-prestart.sh
+    console.print("  [5/6] Creating pihole-FTL-prestart.sh...")
+    prestart_script = """#!/bin/bash
+exit 0"""
+    success, _, error = execute_command(
+        f"bash -c 'cat > /opt/pihole/pihole-FTL-prestart.sh << EOF\n{prestart_script}\nEOF'",
+        sudo=True
+    )
+    if not success:
+        console.print(f"  [red]✗ Failed: {error}[/red]\n")
+        return False
+
+    success, _, _ = execute_command("chmod +x /opt/pihole/pihole-FTL-prestart.sh", sudo=True)
+    if not success:
+        console.print("  [red]✗ Failed to set execute permission[/red]\n")
+        return False
+    console.print("  [green]✓ Script created[/green]")
+
+    # Step 6: Create pihole-FTL-poststop.sh
+    console.print("  [6/6] Creating pihole-FTL-poststop.sh...")
+    poststop_script = """#!/bin/bash
+exit 0"""
+    success, _, error = execute_command(
+        f"bash -c 'cat > /opt/pihole/pihole-FTL-poststop.sh << EOF\n{poststop_script}\nEOF'",
+        sudo=True
+    )
+    if not success:
+        console.print(f"  [red]✗ Failed: {error}[/red]\n")
+        return False
+
+    success, _, _ = execute_command("chmod +x /opt/pihole/pihole-FTL-poststop.sh", sudo=True)
+    if not success:
+        console.print("  [red]✗ Failed to set execute permission[/red]\n")
+        return False
+    console.print("  [green]✓ Script created[/green]")
+
+    # Restart pihole-FTL service
+    console.print("\n[cyan]Restarting pihole-FTL service...[/cyan]")
+    success, _, error = execute_command("systemctl restart pihole-FTL", sudo=True)
+    if not success:
+        console.print(f"[red]✗ Failed to restart service: {error}[/red]\n")
+        return False
+
+    console.print("[green]✓ Service restarted successfully[/green]\n")
+    console.print("[bold green]✓ Pi-hole directory repair completed![/bold green]\n")
+
+    return True
 
 
 def show_banner():
@@ -311,6 +436,29 @@ def main_menu():
     # Load configuration and state
     config = Config()
     state = State()
+
+    # Check Pi-hole directory health (Issue #1 - Critical)
+    is_healthy, missing_items = check_pihole_directory_health()
+    if not is_healthy:
+        show_banner()
+        console.print()
+        show_error("Pi-hole Directory Health Check Failed!")
+        console.print()
+        console.print("[bold red]Missing or incomplete Pi-hole installation:[/bold red]")
+        for item in missing_items:
+            console.print(f"  ✗ {item}")
+        console.print()
+        console.print("[dim]This is a known issue (Issue #1) where /opt/pihole/ directory")
+        console.print("becomes corrupted or missing after system reboots.[/dim]")
+        console.print()
+
+        # Offer auto-repair
+        repair_successful = auto_repair_pihole_directory()
+
+        if not repair_successful:
+            console.print("[yellow]You can manually repair Pi-hole from:")
+            console.print("  Main Menu → Pi-hole Management → Maintenance & Updates → Repair Pi-hole[/yellow]\n")
+            Prompt.ask("Press Enter to continue to main menu", default="")
 
     # Check if initial setup has been completed
     if not state.is_setup_complete():

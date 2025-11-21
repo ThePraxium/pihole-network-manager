@@ -279,23 +279,101 @@ def clean_old_logs():
 
 
 def repair_pihole():
-    """Run Pi-hole repair"""
+    """Run comprehensive Pi-hole repair (directory + reconfigure)"""
     console.print("\n[bold]Repair Pi-hole[/bold]\n")
-    console.print("This will attempt to repair Pi-hole installation issues.\n")
+    console.print("This will repair Pi-hole installation issues including:\n")
+    console.print("  • /opt/pihole/ directory structure")
+    console.print("  • Pi-hole FTL service configuration")
+    console.print("  • Gravity database")
+    console.print()
 
-    if not confirm_action("Run Pi-hole repair?", default=True):
+    if not confirm_action("Run comprehensive Pi-hole repair?", default=True):
         return
 
-    show_status("Running repair... (this may take several minutes)", "info")
+    # Step 1: Check and repair /opt/pihole/ directory
+    console.print("\n[cyan]Step 1/2: Checking /opt/pihole/ directory...[/cyan]\n")
+
+    if not file_exists("/opt/pihole"):
+        console.print("[yellow]⚠ /opt/pihole/ directory missing - recreating...[/yellow]\n")
+
+        # Create directory
+        console.print("  [1/6] Creating /opt/pihole/ directory...")
+        success, _, error = execute_command("mkdir -p /opt/pihole", sudo=True)
+        if not success:
+            show_error(f"Failed to create directory: {error}")
+            wait_for_enter()
+            return
+        console.print("  [green]✓ Directory created[/green]")
+
+        # Create symlinks
+        symlinks = [
+            ("/etc/.pihole/advanced/Scripts/COL_TABLE", "/opt/pihole/COL_TABLE"),
+            ("/etc/.pihole/advanced/Scripts/utils.sh", "/opt/pihole/utils.sh"),
+            ("/etc/.pihole/advanced/Scripts/api.sh", "/opt/pihole/api.sh")
+        ]
+
+        step = 2
+        for source, dest in symlinks:
+            console.print(f"  [{step}/6] Creating symlink: {dest}...")
+            success, _, error = execute_command(f"ln -sf {source} {dest}", sudo=True)
+            if not success:
+                show_error(f"Failed to create symlink: {error}")
+                wait_for_enter()
+                return
+            console.print(f"  [green]✓ Symlink created[/green]")
+            step += 1
+
+        # Create prestart script
+        console.print("  [5/6] Creating pihole-FTL-prestart.sh...")
+        prestart_script = """#!/bin/bash
+exit 0"""
+        success, _, error = execute_command(
+            f"bash -c 'cat > /opt/pihole/pihole-FTL-prestart.sh << EOF\n{prestart_script}\nEOF'",
+            sudo=True
+        )
+        if not success:
+            show_error(f"Failed to create prestart script: {error}")
+            wait_for_enter()
+            return
+
+        execute_command("chmod +x /opt/pihole/pihole-FTL-prestart.sh", sudo=True)
+        console.print("  [green]✓ Script created[/green]")
+
+        # Create poststop script
+        console.print("  [6/6] Creating pihole-FTL-poststop.sh...")
+        poststop_script = """#!/bin/bash
+exit 0"""
+        success, _, error = execute_command(
+            f"bash -c 'cat > /opt/pihole/pihole-FTL-poststop.sh << EOF\n{poststop_script}\nEOF'",
+            sudo=True
+        )
+        if not success:
+            show_error(f"Failed to create poststop script: {error}")
+            wait_for_enter()
+            return
+
+        execute_command("chmod +x /opt/pihole/pihole-FTL-poststop.sh", sudo=True)
+        console.print("  [green]✓ Script created[/green]")
+
+        console.print("\n[green]✓ /opt/pihole/ directory structure repaired[/green]\n")
+    else:
+        console.print("[green]✓ /opt/pihole/ directory exists[/green]\n")
+
+    # Step 2: Run Pi-hole reconfigure
+    console.print("[cyan]Step 2/2: Running Pi-hole reconfigure...[/cyan]\n")
+    show_status("This may take several minutes...", "info")
 
     success, output, error = execute_command("pihole -r --reconfigure", sudo=True)
 
     console.print("\n" + output)
 
     if success:
-        show_success("Pi-hole repair completed")
+        console.print()
+        show_success("Pi-hole repair completed successfully!")
+        console.print()
+        console.print("[green]Services should now be running. Check Health & Diagnostics for verification.[/green]")
     else:
-        show_error("Repair failed")
+        show_error("Pi-hole reconfigure failed")
         if error:
             console.print(f"\n[red]{error}[/red]")
 
