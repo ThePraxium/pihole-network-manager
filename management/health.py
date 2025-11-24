@@ -176,7 +176,8 @@ def check_service_status(silent=False) -> bool:
     if not silent:
         console.print("\n[bold]Service Status Check[/bold]\n")
 
-    services = ["pihole-FTL", "lighttpd"]
+    # Pi-hole v6+ uses FTL's built-in web server on port 80 (no lighttpd needed)
+    services = ["pihole-FTL"]
 
     all_running = True
 

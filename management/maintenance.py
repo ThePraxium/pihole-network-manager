@@ -385,9 +385,9 @@ def view_service_status():
     # clear_screen()  # Disabled to preserve scroll history
     console.print("[bold cyan]Service Status[/bold cyan]\n")
 
+    # Pi-hole v6+ uses FTL's built-in web server on port 80
     services = [
-        ("pihole-FTL", "Pi-hole FTL (DNS/DHCP)"),
-        ("lighttpd", "Web Interface"),
+        ("pihole-FTL", "Pi-hole FTL (DNS/DHCP/Web)"),
         ("ssh", "SSH Server")
     ]
 
